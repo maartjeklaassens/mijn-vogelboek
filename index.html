@@ -107,19 +107,26 @@
     border-radius: 2px;
     object-fit: cover;
 }
-.stamp-name {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: Georgia, serif;
-    font-size: 14.5px;
-    color: #4a212f;
-    font-weight: 700;
+.stamp-card {
+    background-color: white;
+    padding: 12px;
+    padding-bottom: 42px;
+    position: relative;
+    /* Kartelrand postzegel effect */
+    background-image: radial-gradient(circle at 0px 6px, transparent 4px, white 4.5px);
+    background-size: 12px 12px;
+    background-position: -6px -6px;
+    /* We gebruiken een filter om het wit van de kaart zichtbaar te maken en de transparante randen af te knippen */
+    filter: drop-shadow(0px 0px 0px white);
+    -webkit-mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
+    -webkit-mask-size: 12px 12px;
+    -webkit-mask-position: -6px -6px;
+    mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
+    mask-size: 12px 12px;
+    mask-position: -6px -6px;
+    /* Belangrijk voor het wegsnijden van hoeken */
+    mask-composite: subtract;
+    -webkit-mask-composite: destination-in;
 }
 
 @media (max-width: 950px) {
