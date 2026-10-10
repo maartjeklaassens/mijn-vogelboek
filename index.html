@@ -62,7 +62,6 @@
 
 /* --- NIEUWE FOTO COLLAGE & POSTZEGEL CSS --- */
 .photo-collage {
-    /* Masonry layout */
     column-count: 3;
     column-gap: 20px;
     margin-top: 15px;
@@ -81,21 +80,31 @@
 .stamp-card {
     background: white;
     padding: 12px;
-    padding-bottom: 42px; /* Ruimte voor de naam */
+    padding-bottom: 42px;
     position: relative;
-    /* CSS magie: maakt perfecte postzegelrandjes! */
-    -webkit-mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
-    -webkit-mask-size: 12px 12px;
-    -webkit-mask-position: -6px -6px;
-    mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
-    mask-size: 12px 12px;
-    mask-position: -6px -6px;
+    
+    /* Gaten ALLEEN aan de rand, dicht in het midden */
+    -webkit-mask-image: 
+        linear-gradient(black, black),
+        radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
+    -webkit-mask-size: calc(100% - 12px) calc(100% - 12px), 12px 12px;
+    -webkit-mask-position: center, -6px -6px;
+    -webkit-mask-repeat: no-repeat, repeat;
+    -webkit-mask-composite: source-over;
+    
+    mask-image: 
+        linear-gradient(black, black),
+        radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
+    mask-size: calc(100% - 12px) calc(100% - 12px), 12px 12px;
+    mask-position: center, -6px -6px;
+    mask-repeat: no-repeat, repeat;
+    mask-composite: add;
 }
 .stamp-card img {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 2px; /* Hele lichte afronding */
+    border-radius: 2px;
     object-fit: cover;
 }
 .stamp-name {
@@ -113,7 +122,6 @@
     font-weight: 700;
 }
 
-/* Responsiviteit voor de collage */
 @media (max-width: 950px) {
     .photo-collage { column-count: 2; }
 }
@@ -128,9 +136,10 @@
     .stamp-card {
         padding: 8px;
         padding-bottom: 34px;
-        /* Kleinere postzegelrandjes op mobiel */
-        -webkit-mask-size: 10px 10px;
-        -webkit-mask-position: -5px -5px;
+        -webkit-mask-size: calc(100% - 10px) calc(100% - 10px), 10px 10px;
+        -webkit-mask-position: center, -5px -5px;
+        mask-size: calc(100% - 10px) calc(100% - 10px), 10px 10px;
+        mask-position: center, -5px -5px;
     }
     .stamp-name {
         height: 34px;
@@ -149,7 +158,7 @@
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=6"></script>
+<script type="module" src="./app.js?v=7"></script>
 
 <!-- STARTPAGINA & CURSOR LOGICA -->
 <script>
