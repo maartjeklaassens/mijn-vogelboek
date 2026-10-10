@@ -29,7 +29,7 @@
     text-align: center;
     user-select: none;
     z-index: 10;
-    pointer-events: none; /* Tekst blokkeert de muis niet */
+    pointer-events: none;
 }
 .start-btn {
     background-color: #c25977;
@@ -49,17 +49,93 @@
     background-color: #a3425e;
     transform: scale(1.05);
 }
-
-/* --- VOGEL CURSOR EFFECT CSS --- */
 .cursor-bird {
     position: absolute;
-    width: 200px; /* Grootte van de vogeltjes */
+    width: 150px;
     height: auto;
-    pointer-events: none; /* Muis klikt en beweegt er dwars doorheen */
-    z-index: 5; /* Zorgt dat de knop erboven blijft */
+    pointer-events: none;
+    z-index: 5;
     transition: opacity 0.4s ease-out, transform 0.4s ease-out;
     opacity: 1;
     transform-origin: center center;
+}
+
+/* --- NIEUWE FOTO COLLAGE & POSTZEGEL CSS --- */
+.photo-collage {
+    /* Masonry layout */
+    column-count: 3;
+    column-gap: 20px;
+    margin-top: 15px;
+}
+.stamp-wrapper {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 6px 12px rgba(194, 89, 119, 0.15));
+    transition: transform 0.2s ease;
+    display: inline-block;
+    width: 100%;
+}
+.stamp-wrapper:hover {
+    transform: scale(1.02) rotate(-1.5deg);
+}
+.stamp-card {
+    background: white;
+    padding: 12px;
+    padding-bottom: 42px; /* Ruimte voor de naam */
+    position: relative;
+    /* CSS magie: maakt perfecte postzegelrandjes! */
+    -webkit-mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
+    -webkit-mask-size: 12px 12px;
+    -webkit-mask-position: -6px -6px;
+    mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
+    mask-size: 12px 12px;
+    mask-position: -6px -6px;
+}
+.stamp-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 2px; /* Hele lichte afronding */
+    object-fit: cover;
+}
+.stamp-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, serif;
+    font-size: 14.5px;
+    color: #4a212f;
+    font-weight: 700;
+}
+
+/* Responsiviteit voor de collage */
+@media (max-width: 950px) {
+    .photo-collage { column-count: 2; }
+}
+@media (max-width: 550px) {
+    .photo-collage { 
+        column-count: 2; 
+        column-gap: 12px; 
+    }
+    .stamp-wrapper { 
+        margin-bottom: 12px; 
+    }
+    .stamp-card {
+        padding: 8px;
+        padding-bottom: 34px;
+        /* Kleinere postzegelrandjes op mobiel */
+        -webkit-mask-size: 10px 10px;
+        -webkit-mask-position: -5px -5px;
+    }
+    .stamp-name {
+        height: 34px;
+        font-size: 12px;
+    }
 }
 </style>
 </head>
@@ -73,14 +149,13 @@
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=5"></script>
+<script type="module" src="./app.js?v=6"></script>
 
 <!-- STARTPAGINA & CURSOR LOGICA -->
 <script>
     const startBtn = document.getElementById('start-btn');
     const startScreen = document.getElementById('start-screen');
     
-    // Verwijder het startscherm als je op de knop klikt
     startBtn.addEventListener('click', function() {
         startScreen.style.opacity = '0';
         setTimeout(() => {
@@ -88,7 +163,6 @@
         }, 500); 
     });
 
-    // De exacte bestandsnamen die in de map vogel_tekeningen staan
     const birdFiles = [
         'bijeneter.png', 'blauwborst.png', 'flamingo.png', 'geelgord.png',
         'goudvink.png', 'grauwekiekendief.png', 'groenling.png', 'grotebontespecht.png',
@@ -97,10 +171,8 @@
         'wielewaal.png', 'zeearend.png', 'zwarteooievaar.png'
     ];
 
-    // Hussel de lijst zodat de vogels in willekeurige volgorde komen
     birdFiles.sort(() => Math.random() - 0.5);
 
-    // Laad afbeeldingen op de achtergrond vooraf in om knipperen te voorkomen
     birdFiles.forEach(file => {
         const img = new Image();
         img.src = `./vogel_tekeningen/${file}`;
@@ -109,40 +181,34 @@
     let currentBirdIndex = 0;
     let activeBirds = [];
     let lastSpawnPos = { x: -999, y: -999 };
-    const SPAWN_DISTANCE = 120; // Aantal pixels muisbeweging voordat een nieuwe vogel verschijnt
-    const MAX_BIRDS = 5; // Maximaal 5 vogels tegelijkertijd zichtbaar
+    const SPAWN_DISTANCE = 120; 
+    const MAX_BIRDS = 5; 
 
-    // Luister naar de muisbeweging (laptop)
     startScreen.addEventListener('mousemove', function(e) {
         handlePointerMove(e.clientX, e.clientY);
     });
 
-    // Luister naar veegbewegingen (mobiel)
     startScreen.addEventListener('touchmove', function(e) {
         const touch = e.touches[0];
         handlePointerMove(touch.clientX, touch.clientY);
     });
 
-    // Bereken de afstand die de muis heeft afgelegd
     function handlePointerMove(x, y) {
         const dx = x - lastSpawnPos.x;
         const dy = y - lastSpawnPos.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Als we ver genoeg zijn bewogen, plaats een nieuwe vogel
         if (distance > SPAWN_DISTANCE) {
             lastSpawnPos = { x: x, y: y };
             spawnBird(x, y);
         }
     }
 
-    // Plaats de vogel op de x en y coördinaten van je muis
     function spawnBird(x, y) {
         const img = document.createElement('img');
         img.src = `./vogel_tekeningen/${birdFiles[currentBirdIndex]}`;
         img.className = 'cursor-bird';
         
-        // Geef de vogel een willekeurige lichte draai (tussen -20 en +20 graden)
         const rotation = Math.random() * 40 - 20;
         img.style.left = `${x}px`;
         img.style.top = `${y}px`;
@@ -151,17 +217,15 @@
         startScreen.appendChild(img);
         activeBirds.push(img);
 
-        // Pak de volgende vogel uit de lijst voor de volgende beweging
         currentBirdIndex = (currentBirdIndex + 1) % birdFiles.length;
 
-        // Als er meer dan 5 vogels zijn, laat de oudste dan vervagen en verdwijnen
         if (activeBirds.length > MAX_BIRDS) {
             const oldBird = activeBirds.shift();
             oldBird.style.opacity = '0';
-            oldBird.style.transform = oldBird.style.transform + ' scale(0.8)'; // Klein beetje krimpen
+            oldBird.style.transform = oldBird.style.transform + ' scale(0.8)'; 
             setTimeout(() => {
                 if(oldBird.parentNode) oldBird.parentNode.removeChild(oldBird);
-            }, 400); // 400ms wachten tot de CSS opacity transitie klaar is
+            }, 400); 
         }
     }
 </script>
