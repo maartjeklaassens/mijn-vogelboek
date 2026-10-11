@@ -1,8 +1,8 @@
-import {seed} from './species.js?v=18';
+import {seed} from './species.js?v=19';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
-// VUL HIER JE SUPABASE GEGEVENS IN ZODAT VRIENDEN DIRECT JE DATA ZIEN:
+// VUL HIER JE SUPABASE GEGEVENS IN VOOR JE VRIENDEN (of laat leeg voor lokaal):
 // ============================================================================
 const DEFAULT_SUPABASE_URL = 'https://ungxityeqrsyvykemaep.supabase.co'; 
 const DEFAULT_SUPABASE_KEY = 'sb_publishable_eWyAc7GqPMxz9LKKl3b-JA_kjoCdhEa';
@@ -70,19 +70,21 @@ function getHashPage(){
 let page=getHashPage(),term='',group='Alle groepen',rarity='Alle zeldzaamheden',filter='alle',sortBy='standaard',modal=null, busy=false, message='',msgType='notice';
 let species=seed.map((s,idx)=>({...s, idx, rarity:getRarity(s)}));
 let entries=JSON.parse(localStorage.getItem('vogelboek-entries')||'{}');
-let supabase=null,session=null,cloud=false,canEdit=false;
+let supabase=null,session=null,cloud=false,canEdit=true;
 
 let savedConfig=JSON.parse(localStorage.getItem('vogelboek-config')||'null');
-let config = (savedConfig?.url && savedConfig?.key) ? savedConfig : (DEFAULT_SUPABASE_URL.startsWith('https://') && !DEFAULT_SUPABASE_URL.includes('JOUW-PROJECT-ID') ? {url:DEFAULT_SUPABASE_URL, key:DEFAULT_SUPABASE_KEY} : null);
+let hasDefault = DEFAULT_SUPABASE_URL.startsWith('https://') && DEFAULT_SUPABASE_KEY.length > 10;
+let config = (savedConfig?.url && savedConfig?.key) ? savedConfig : (hasDefault ? {url:DEFAULT_SUPABASE_URL.trim(), key:DEFAULT_SUPABASE_KEY.trim()} : null);
 
 const STORE='vogelboek-entries';
 function saveLocal(){localStorage.setItem(STORE,JSON.stringify(entries))}
 function notify(t,typ='notice'){message=t;msgType=typ;render()}
 
 async function initCloud(){
+    // Teken de pagina ALTIJD direct zodat het scherm nooit wit/leeg blijft!
+    render();
     if(!config?.url||!config?.key){
-        canEdit=true; // Alleen lokaal zonder Supabase
-        render();
+        canEdit=true;
         return;
     }
     try{
@@ -91,7 +93,7 @@ async function initCloud(){
         const {data:{session:s}}=await supabase.auth.getSession();
         session=s;
         canEdit=!!s;
-        await fetchCloud(); // Haal ALTIJD de waarnemingen op (ook voor niet-ingelogde vrienden!)
+        await fetchCloud();
         if(location.hash.includes('access_token=')){
             history.replaceState(null,'','#dashboard');
             page='dashboard';
@@ -101,7 +103,10 @@ async function initCloud(){
             canEdit=!!s;
             setTimeout(()=>fetchCloud(),0);
         });
-    }catch(e){message='Cloudverbinding niet beschikbaar: '+e.message;msgType='error'}
+    }catch(e){
+        message='Cloudverbinding niet beschikbaar: '+e.message;
+        msgType='error';
+    }
     render();
 }
 
@@ -132,7 +137,7 @@ async function persist(id,obj,file){
         entries[id]={...obj,photoPath:path};
         return;
     }
-    if(!canEdit) throw Error('Alleen de eigenaar kan waarnemingen aanpassen.');
+    if(!canEdit) throw Error('Log eerst in bij Instellingen om waarnemingen aan te passen.');
     if(file){
         if(!file.type.startsWith('image/'))throw Error('Kies een afbeeldingsbestand.');
         if(file.size>2*1024*1024)throw Error('In de lokale proefstand maximaal 2 MB per foto.');
@@ -143,7 +148,7 @@ async function persist(id,obj,file){
 }
 
 async function removeEntry(id){
-    if(!canEdit) throw Error('Alleen de eigenaar kan waarnemingen verwijderen.');
+    if(!canEdit) throw Error('Log eerst in bij Instellingen om waarnemingen te verwijderen.');
     if(cloud){
         const {error}=await supabase.from('observations').delete().eq('species_id',id);
         if(error)throw error;
@@ -157,7 +162,6 @@ async function photoUrl(id){
     if(!e)return '';
     if(e.photo)return e.photo;
     if(!e.photoPath||!supabase)return '';
-    // Probeer eerst een Signed URL (werkt altijd als je bent ingelogd), anders de Public URL (voor bezoekers/vrienden)
     const {data,error}=await supabase.storage.from('bird-photos').createSignedUrl(e.photoPath,3600);
     if(!error && data?.signedUrl) return data.signedUrl;
     const pub=supabase.storage.from('bird-photos').getPublicUrl(e.photoPath);
@@ -202,4 +206,79 @@ function dashboard(){const seen=countSeen(),photos=countPhoto();const recent=spe
 function rowitem(s){let e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="rowitem">${src?`<img class="thumb" src="${esc(src)}" alt="Eigen foto ${esc(s.name)}">`:`<div class="thumb" style="display:flex;align-items:center;justify-content:center">${groupIcon(s.group,28)}</div>`}<div><b>${esc(s.name)}</b><br><span>${esc(s.group)} · ${esc(s.rarity)}${e?.date?' · '+esc(e.date):''}${e?.location?' · '+esc(e.location):''}</span></div><button class="link" data-edit="${esc(s.id)}">${canEdit?'Bewerk →':'Bekijk →'}</button></div>`}
 
 function card(s){
-    const e=entries[s.id],
+    const e=entries[s.id],src=e?.photo||photoCache[s.id];
+    const bottomBtns = canEdit
+        ? `<div class="bird-bottom"><button data-toggle="${esc(s.id)}">${e?.seen?'✓ Gezien':'＋ Gezien'}</button><button data-edit="${esc(s.id)}">Details →</button></div>`
+        : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
+    return `<div class="bird-card"><div class="bird-top">${src?`<img src="${esc(src)}" alt="Eigen foto ${esc(s.name)}">`:groupIcon(s.group,52)}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
+}
+
+function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}"><div class="stamp-name">${esc(s.name)}</div></div></div>`}
+
+function vogels(){
+    let groups=[...new Set(species.map(s=>s.group))].sort();
+    let arr=species.filter(s=>
+        (s.name+' '+s.scientific).toLowerCase().includes(term.toLowerCase()) &&
+        (group==='Alle groepen'||s.group===group) &&
+        (rarity==='Alle zeldzaamheden'||s.rarity===rarity) &&
+        (filter==='alle'||(filter==='gezien'&&entries[s.id]?.seen)||(filter==='ongezien'&&!entries[s.id]?.seen)||(filter==='zonderfoto'&&entries[s.id]?.seen&&!entries[s.id]?.photo&&!entries[s.id]?.photoPath))
+    );
+
+    arr = [...arr].sort((a,b)=>{
+        const seenA = entries[a.id]?.seen ? 1 : 0;
+        const seenB = entries[b.id]?.seen ? 1 : 0;
+        if(sortBy==='gezien-eerst' && seenA!==seenB) return seenB - seenA;
+        if(sortBy==='ongezien-eerst' && seenA!==seenB) return seenA - seenB;
+        if(sortBy==='naam-az') return a.name.localeCompare(b.name,'nl');
+        return a.idx - b.idx;
+    });
+
+    return `${header('Alle vogels','Zoek, sorteer en bouw je persoonlijke levenslijst op.')}<div class="toolbar" style="margin-bottom:18px"><div class="filterbar"><input class="input search" id="search" placeholder="🔎 Zoek Nederlandse of Latijnse naam" value="${esc(term)}"><select class="select" id="group"><option>Alle groepen</option>${groups.map(g=>`<option ${group===g?'selected':''}>${esc(g)}</option>`).join('')}</select><select class="select" id="rarity"><option>Alle zeldzaamheden</option>${rarityOrder.map(r=>`<option ${rarity===r?'selected':''}>${esc(r)}</option>`).join('')}</select><select class="select" id="filter"><option value="alle" ${filter==='alle'?'selected':''}>Filter: Alle soorten</option><option value="gezien" ${filter==='gezien'?'selected':''}>Alleen gezien</option><option value="ongezien" ${filter==='ongezien'?'selected':''}>Alleen niet gezien</option><option value="zonderfoto" ${filter==='zonderfoto'?'selected':''}>Foto ontbreekt</option></select><select class="select" id="sort"><option value="standaard" ${sortBy==='standaard'?'selected':''}>Sorteer: Taxonomisch</option><option value="gezien-eerst" ${sortBy==='gezien-eerst'?'selected':''}>Sorteer: Gezien eerst</option><option value="ongezien-eerst" ${sortBy==='ongezien-eerst'?'selected':''}>Sorteer: Niet gezien eerst</option><option value="naam-az" ${sortBy==='naam-az'?'selected':''}>Sorteer: Naam (A–Z)</option></select></div><span class="counter">${arr.length} van ${species.length} soorten <small class="muted" style="display:block;font-size:11px;text-align:right">Bron: Dutch Avifauna (CSNA)</small></span></div><div class="birds">${arr.map(card).join('')}</div>${arr.length?'':'<div class="empty">Geen soorten gevonden voor deze filters.</div>'}`;
+}
+
+function fotos(){const birds=species.filter(s=>entries[s.id]?.seen&&(entries[s.id].photo||entries[s.id].photoPath));const missing=species.filter(s=>entries[s.id]?.seen&&!entries[s.id].photo&&!entries[s.id].photoPath);return `${header("Mijn foto's",'Jouw eigen vogelfotocollectie.')}${birds.length?`<div class="photo-collage">${birds.map(stampCard).join('')}</div>`:'<div class="empty">Nog geen foto toegevoegd.</div>'}<section class="panel" style="margin-top:35px"><h2>Gezien, maar nog geen foto</h2>${missing.length?missing.map(rowitem).join(''):'<p class="muted">Nog geen soorten zonder foto.</p>'}</section>`}
+
+function ontdekken(){const missing=species.filter(s=>entries[s.id]?.seen&&!entries[s.id]?.photo&&!entries[s.id]?.photoPath);const unseen=species.filter(s=>!entries[s.id]?.seen);return `${header('Ontdekken','Welke vogel wordt jouw volgende?')}<div class="grid2" style="margin-top:20px;align-items:start"><section class="panel"><div class="panel-header"><h2>Wel gezien, geen foto</h2><span class="pill">${missing.length}</span></div>${missing.length?missing.slice(0,15).map(rowitem).join(''):'<p class="muted">Geen soorten zonder foto.</p>'}</section><section class="panel"><div class="panel-header"><h2>Nog te ontdekken</h2><span class="pill">${unseen.length}</span></div>${unseen.slice(0,15).map(rowitem).join('')}</section></div>`}
+
+function stats(){
+    const seen=species.filter(s=>entries[s.id]?.seen),total=species.length;
+    const rarities=rarityOrder.map(r=>({r,n:seen.filter(s=>s.rarity===r).length,total:species.filter(s=>s.rarity===r).length}));
+    const groups=[...new Set(species.map(s=>s.group))].map(g=>({g,n:seen.filter(s=>s.group===g).length,total:species.filter(s=>s.group===g).length})).sort((a,b)=>b.n-a.n);
+    return `${header('Statistieken','Jouw vogeldagboek in cijfers.')}
+<div class="stats">${stat('Levenslijst',seen.length)}${stat('Voortgang catalogus',total?Math.round(100*seen.length/total)+'%':'0%')}${stat('Foto’s',countPhoto())}</div>
+<section class="panel"><h2>Zeldzaamheid</h2>${rarities.map(x=>`<div class="chartline"><label>${esc(x.r)}</label><div class="track"><div style="width:${x.total?100*x.n/x.total:0}%"></div></div><span>${x.n}/${x.total}</span></div>`).join('')}</section>
+<section class="panel"><h2>Vogelgroepen</h2>${groups.map(x=>`<div class="chartline"><label>${esc(x.g)}</label><div class="track"><div style="width:${x.total?100*x.n/x.total:0}%"></div></div><span>${x.n}/${x.total}</span></div>`).join('')}</section>`;
+}
+
+function settings(){return `${header('Instellingen','Beheer voor de eigenaar van dit vogelboek.')}
+<div class="layout"><section class="panel"><h2>${canEdit&&session?'Mijn account':'Eigenaar login'}</h2>${canEdit&&session?`<p>Ingelogd als <b>${esc(session.user.email)}</b>. Je kunt waarnemingen en foto's toevoegen of bewerken.</p><button class="button alt" id="logout">Uitloggen</button>`:`<p class="sectionlead">Dit vogelboek staat in de deel-modus zodat bezoekers alle waarnemingen en foto's direct kunnen bekijken. Log hieronder in als je zelf de eigenaar bent en wijzigingen wilt aanbrengen.</p>${supabase?`<form id="loginform"><label class="formfield">E-mailadres<input type="email" class="input" name="email" required></label><label class="formfield">Wachtwoord<input type="password" class="input" name="password" minlength="6" required></label><button class="button" value="login" name="action">Inloggen als eigenaar</button></form><hr style="border:0;border-top:1px solid #ebe4e7;margin:22px 0">`:''}<div class="formfield">Supabase project URL<input class="input" id="supurl" value="${esc(config?.url||'')}" placeholder="https://xxxx.supabase.co"></div><div class="formfield">Publishable / anon key<input class="input" id="supkey" value="${esc(config?.key||'')}" placeholder="sb_publishable_..."></div><button class="button alt" id="connect">Verbinding opslaan</button>`}</section>
+<section class="panel"><h2>Back-up van je gegevens</h2><p class="sectionlead">Download de waarnemingen als JSON-bestand.</p><button class="button alt" id="export">Download JSON-back-up</button></section></div>`}
+
+function modalHtml(){
+    if(!modal)return '';
+    const s=species.find(x=>x.id===modal);
+    if(!s)return '';
+    const e=entries[s.id]||{}, src=e.photo||photoCache[s.id];
+    if(!canEdit){
+        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${src?`<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px" src="${esc(src)}" alt="Eigen foto">`:''}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Datum & locatie</span><b style="font-size:16px">${esc(e.date||'—')}${e.location?' · '+esc(e.location):''}</b></div></div></div></div></div>`;
+    }
+    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
+}
+
+function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><div class="logo">Mijn Vogelboek<small>Vogels verzamelen</small></div><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos()}
+
+window.addEventListener('hashchange',()=>{
+    const newPage=getHashPage();
+    if(newPage!==page || modal!==null){
+        page=newPage;
+        modal=null;
+        render();
+        window.scrollTo(0,0);
+    }
+});
+
+document.addEventListener('click',async ev=>{let t=ev.target.closest('[data-page],[data-edit],[data-toggle],#close,#delete,#logout,#connect,#export,#dismiss');if(!t)return;if(t.dataset.page){const target=t.dataset.page;if(location.hash==='#'+target){page=target;modal=null;render();window.scrollTo(0,0)}else{location.hash=target}}else if(t.dataset.edit){modal=t.dataset.edit;render()}else if(t.dataset.toggle){const id=t.dataset.toggle;try{if(entries[id]?.seen){await removeEntry(id)}else await persist(id,{seen:true,date:'',location:''});render()}catch(e){notify(e.message,'error')}}else if(t.id==='close'){modal=null;render()}else if(t.id==='dismiss'){message='';render()}else if(t.id==='delete'){if(!confirm('Wil je deze waarneming verwijderen?'))return;try{await removeEntry(modal);modal=null;render()}catch(e){notify(e.message,'error')}}else if(t.id==='logout'){await supabase.auth.signOut();session=null;canEdit=false;await fetchCloud();render()}else if(t.id==='connect'){let url=$('#supurl').value.trim(),key=$('#supkey').value.trim();if(!/^https:\/\/[\w-]+\.supabase\.co\/?$/.test(url)||!key){notify('Voer een geldige Supabase URL en publishable key in.','error');return}localStorage.setItem('vogelboek-config',JSON.stringify({url,key}));config={url,key};location.reload()}else if(t.id==='export'){const payload=JSON.stringify({version:1,species,entries},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([payload],{type:'application/json'}));a.download='mijn-vogelboek-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}});
+document.addEventListener('input',e=>{if(e.target.id==='search'){let pos=e.target.selectionStart;term=e.target.value;render();const el=$('#search');el.focus();el.setSelectionRange(pos,pos)}});
+document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.target.value;render()}else if(e.target.id==='rarity'){rarity=e.target.value;render()}else if(e.target.id==='filter'){filter=e.target.value;render()}else if(e.target.id==='sort'){sortBy=e.target.value;render()}else if(e.target.id==='seen'){$('#obsfields').style.opacity=e.target.checked?'1':'.45'}});
+document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{};await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}modal=null;notify('Waarneming opgeslagen.','success')}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
+initCloud();
