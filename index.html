@@ -60,45 +60,82 @@
     transform-origin: center center;
 }
 
-/* --- NIEUWE FOTO COLLAGE & POSTZEGEL CSS --- */
+/* --- FOTO COLLAGE & POSTZEGEL CSS --- */
 .photo-collage {
     column-count: 3;
-    column-gap: 20px;
+    column-gap: 22px;
     margin-top: 15px;
 }
 .stamp-wrapper {
     break-inside: avoid;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 6px 12px rgba(194, 89, 119, 0.15));
+    margin-bottom: 22px;
+    filter: drop-shadow(0 6px 14px rgba(194, 89, 119, 0.16));
     transition: transform 0.2s ease;
     display: inline-block;
     width: 100%;
+    cursor: pointer;
 }
 .stamp-wrapper:hover {
     transform: scale(1.02) rotate(-1.5deg);
 }
 .stamp-card {
-    background: white;
-    padding: 12px;
-    padding-bottom: 42px;
+    background-color: white;
+    padding: 14px;
+    padding-bottom: 44px;
     position: relative;
     
-    /* Gaten ALLEEN aan de rand, dicht in het midden */
+    /* 1 dicht middenblok + 4 losse randen met 'space' zodat elke zijde exact uitkomt */
+    --hole: radial-gradient(circle, transparent 4px, black 4.5px);
+    
     -webkit-mask-image: 
         linear-gradient(black, black),
-        radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
-    -webkit-mask-size: calc(100% - 12px) calc(100% - 12px), 12px 12px;
-    -webkit-mask-position: center, -6px -6px;
-    -webkit-mask-repeat: no-repeat, repeat;
-    -webkit-mask-composite: source-over;
-    
+        var(--hole),
+        var(--hole),
+        var(--hole),
+        var(--hole);
+    -webkit-mask-size: 
+        calc(100% - 12px) calc(100% - 12px),
+        12px 12px,
+        12px 12px,
+        12px 12px,
+        12px 12px;
+    -webkit-mask-position: 
+        center,
+        0 -6px,
+        0 calc(100% + 6px),
+        -6px 0,
+        calc(100% + 6px) 0;
+    -webkit-mask-repeat: 
+        no-repeat,
+        space no-repeat,
+        space no-repeat,
+        no-repeat space,
+        no-repeat space;
+
     mask-image: 
         linear-gradient(black, black),
-        radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
-    mask-size: calc(100% - 12px) calc(100% - 12px), 12px 12px;
-    mask-position: center, -6px -6px;
-    mask-repeat: no-repeat, repeat;
-    mask-composite: add;
+        var(--hole),
+        var(--hole),
+        var(--hole),
+        var(--hole);
+    mask-size: 
+        calc(100% - 12px) calc(100% - 12px),
+        12px 12px,
+        12px 12px,
+        12px 12px,
+        12px 12px;
+    mask-position: 
+        center,
+        0 -6px,
+        0 calc(100% + 6px),
+        -6px 0,
+        calc(100% + 6px) 0;
+    mask-repeat: 
+        no-repeat,
+        space no-repeat,
+        space no-repeat,
+        no-repeat space,
+        no-repeat space;
 }
 .stamp-card img {
     width: 100%;
@@ -107,26 +144,19 @@
     border-radius: 2px;
     object-fit: cover;
 }
-.stamp-card {
-    background-color: white;
-    padding: 12px;
-    padding-bottom: 42px;
-    position: relative;
-    /* Kartelrand postzegel effect */
-    background-image: radial-gradient(circle at 0px 6px, transparent 4px, white 4.5px);
-    background-size: 12px 12px;
-    background-position: -6px -6px;
-    /* We gebruiken een filter om het wit van de kaart zichtbaar te maken en de transparante randen af te knippen */
-    filter: drop-shadow(0px 0px 0px white);
-    -webkit-mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
-    -webkit-mask-size: 12px 12px;
-    -webkit-mask-position: -6px -6px;
-    mask-image: radial-gradient(circle at 6px 6px, transparent 4px, black 4.5px);
-    mask-size: 12px 12px;
-    mask-position: -6px -6px;
-    /* Belangrijk voor het wegsnijden van hoeken */
-    mask-composite: subtract;
-    -webkit-mask-composite: destination-in;
+.stamp-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, serif;
+    font-size: 15px;
+    color: #4a212f;
+    font-weight: 700;
 }
 
 @media (max-width: 950px) {
@@ -141,16 +171,12 @@
         margin-bottom: 12px; 
     }
     .stamp-card {
-        padding: 8px;
-        padding-bottom: 34px;
-        -webkit-mask-size: calc(100% - 10px) calc(100% - 10px), 10px 10px;
-        -webkit-mask-position: center, -5px -5px;
-        mask-size: calc(100% - 10px) calc(100% - 10px), 10px 10px;
-        mask-position: center, -5px -5px;
+        padding: 10px;
+        padding-bottom: 36px;
     }
     .stamp-name {
-        height: 34px;
-        font-size: 12px;
+        height: 36px;
+        font-size: 12.5px;
     }
 }
 </style>
@@ -165,7 +191,7 @@
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=7"></script>
+<script type="module" src="./app.js?v=8"></script>
 
 <!-- STARTPAGINA & CURSOR LOGICA -->
 <script>
