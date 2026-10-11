@@ -152,7 +152,6 @@
     border-radius: 2px;
     object-fit: cover;
 }
-/* Lichter en eleganter lettertype onder de postzegel */
 .stamp-name {
     position: absolute;
     bottom: 0;
@@ -201,18 +200,42 @@
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=10"></script>
+<script type="module" src="./app.js?v=12"></script>
 
 <!-- STARTPAGINA & CURSOR LOGICA -->
 <script>
     const startBtn = document.getElementById('start-btn');
     const startScreen = document.getElementById('start-screen');
     
+    // Als er al een #pagina in de URL staat (bijv. bij pagina verversen), verberg het startscherm direct
+    if (window.location.hash && window.location.hash !== '#') {
+        startScreen.style.display = 'none';
+        startScreen.style.opacity = '0';
+    }
+
     startBtn.addEventListener('click', function() {
+        window.location.hash = 'dashboard';
         startScreen.style.opacity = '0';
         setTimeout(() => {
             startScreen.style.display = 'none';
         }, 500); 
+    });
+
+    // Als de gebruiker met het 'Terug'-pijltje helemaal terugkeert naar de kale URL zonder #, toon het startscherm weer
+    window.addEventListener('hashchange', function() {
+        if (!window.location.hash || window.location.hash === '#') {
+            startScreen.style.display = 'flex';
+            requestAnimationFrame(() => {
+                startScreen.style.opacity = '1';
+            });
+        } else {
+            startScreen.style.opacity = '0';
+            setTimeout(() => {
+                if (window.location.hash && window.location.hash !== '#') {
+                    startScreen.style.display = 'none';
+                }
+            }, 500);
+        }
     });
 
     const birdFiles = [
