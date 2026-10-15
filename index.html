@@ -237,20 +237,22 @@
         }
     });
 
-    const birdFiles = [
-        'bijeneter.png', 'blauwborst.png', 'flamingo.png', 'geelgord.png',
-        'goudvink.png', 'grauwekiekendief.png', 'groenling.png', 'grotebontespecht.png',
-        'halsbandparkiet.png', 'huismus.png', 'ijsvogel.png', 'kerkuil.png',
-        'kluut.png', 'merel.png', 'roodmus.png', 'smient.png', 'staartmees.png',
-        'wielewaal.png', 'zeearend.png', 'zwarteooievaar.png'
+const birdFiles = [
+        'bijeneter.png', 'blauwborst.png', 'flamingo.png', 'gaai.png',
+        'geelgord.png', 'goudvink.png', 'grauwekiekendief.png', 'groenling.png',
+        'grotebontespecht.png', 'halsbandparkiet.png', 'huismus.png', 'ijsvogel.png',
+        'kerkuil.png', 'kluut.png', 'merel.png', 'middelstezaagbek.png',
+        'nonnetje.png', 'pestvogel.png', 'rietgors.png', 'roodborst.png',
+        'roodborsttapuit.png', 'roodmus.png', 'rossefranjepoot.png', 'sijs.png',
+        'smient.png', 'staartmees.png', 'stadsduif.png', 'wielewaal.png',
+        'zeearend.png', 'zeekoet.png', 'zwarteibis.png', 'zwarteooievaar.png'
     ];
 
-    birdFiles.sort(() => Math.random() - 0.5);
-
-    birdFiles.forEach(file => {
-        const img = new Image();
-        img.src = `./vogel_tekeningen/${file}`;
-    });
+    // Echte willekeurige mix zodat je pas na alle 32 vogels dezelfde terugziet
+    for (let i = birdFiles.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [birdFiles[i], birdFiles[j]] = [birdFiles[j], birdFiles[i]];
+    }
 
     let currentBirdIndex = 0;
     let activeBirds = [];
