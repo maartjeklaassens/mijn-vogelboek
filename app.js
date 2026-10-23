@@ -1,4 +1,4 @@
-import {seed} from './species.js?v=21';
+import {seed} from './species.js?v=22';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -190,22 +190,6 @@ function nav(){return tabs.map(([k,icon,title])=>`<button data-page="${k}" class
 function header(title,sub){return `<div class="top"><div><div class="eyebrow">Mijn persoonlijke natuurdagboek</div><h1>${title}</h1>${sub?`<div class="muted">${sub}</div>`:''}</div></div>`}
 function stat(label,value){return `<div class="stat"><span>${label}</span><b>${value}</b></div>`}
 
-function renderBadges() {
-    const owls = species.filter(s=>s.group==='Uilen').length;
-    const seenOwls = species.filter(s=>s.group==='Uilen' && entries[s.id]?.seen).length;
-    const seenStrand = species.filter(s=>s.group==='Strandlopers en franjepoten' && entries[s.id]?.seen).length;
-    const seenDwaal = species.filter(s=>s.rarity==='Dwaalgast' && entries[s.id]?.seen).length;
-    const totalSeen = countSeen();
-
-    const badges = [
-        {name:'Eerste Stap', desc:'De ontdekkingsreis begint', emo:'🪶', done: totalSeen>=1},
-        {name:'Kustjutter', desc:'10 strandlopers gezien', emo:'🌊', done: seenStrand>=10},
-        {name:'Uilenfluisteraar', desc:'Alle uilen gevonden', emo:'🦉', done: seenOwls>0 && seenOwls>=owls},
-        {name:'Geluksvogel', desc:'Dwaalgast gespot', emo:'✨', done: seenDwaal>=1}
-    ];
-    return `<section class="panel" style="margin-top:20px; text-align:center"><h2>Jouw Verzamelaars-badges</h2><p class="muted">Verdien geborduurde badges door nieuwe soorten te ontdekken.</p><div class="badges-grid">${badges.map(b=>`<div class="badge ${b.done?'won':'locked'}"><div>${b.emo}</div><b>${b.name}</b><span>${b.desc}</span></div>`).join('')}</div></section>`;
-}
-
 function dashboard(){
     const seen=countSeen(),photos=countPhoto();
     const recent=species.filter(s=>entries[s.id]?.seen).slice(-5);
@@ -214,15 +198,14 @@ function dashboard(){
     return `<div class="top"><div><div class="eyebrow">Mijn persoonlijke natuurdagboek</div><h1>Welkom in je vogelboek</h1><div class="muted">Overzicht van al je waarnemingen en foto's.</div></div></div>
 <div class="hero ${tp.class}"><div><div class="eyebrow" style="color:rgba(255,255,255,0.7)">${tp.eye}</div><h2>${tp.title}</h2><p>Vink je soorten af, voeg je eigen foto's toe en bekijk welke vogels je nog kunt ontdekken.</p><button class="button" style="margin-top:18px;background:white;color:black" data-page="vogels">Bekijk alle vogels →</button></div><div style="font-size:75px">${tp.emoji}</div></div>
 <div class="stats">${stat('Soorten gezien',seen)}${stat("Met eigen foto",photos)}${stat('Nog zonder foto',seen-photos)}${stat('Dit jaar',Object.values(entries).filter(e=>e.seen&&e.date?.startsWith(new Date().getFullYear().toString())).length)}</div>
-<div class="layout"><section class="panel"><div class="panel-header"><h2>Jouw waarnemingen</h2><button class="link" data-page="vogels">Alle vogels →</button></div>${recent.length?recent.map(s=>rowitem(s)).join(''):'<div class="empty">Nog geen waarnemingen.</div>'}</section><section class="panel"><h2>Op zoek naar...</h2><p class="sectionlead">Je eigen ontdek-lijst: soorten die je nog wilt zien en gefotografeerde soorten die ontbreken.</p><button class="button" data-page="ontdekken">Bekijk je zoeklijst</button></section></div>
-${renderBadges()}`;
+<div class="layout"><section class="panel"><div class="panel-header"><h2>Jouw waarnemingen</h2><button class="link" data-page="vogels">Alle vogels →</button></div>${recent.length?recent.map(s=>rowitem(s)).join(''):'<div class="empty">Nog geen waarnemingen.</div>'}</section><section class="panel"><h2>Op zoek naar...</h2><p class="sectionlead">Je eigen ontdek-lijst: soorten die je nog wilt zien en gefotografeerde soorten die ontbreken.</p><button class="button" data-page="ontdekken">Bekijk je zoeklijst</button></section></div>`;
 }
 
 function rowitem(s, blur=false){
     let e=entries[s.id],src=e?.photo||photoCache[s.id];
     let hwText = e?.date || e?.location ? `<br><span class="handwritten">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
     let thumb = src 
-        ? `<div class="washi-wrapper" style="width:55px;height:55px"><img class="thumb ${blur?'wazig':''}" style="width:100%;height:100%" src="${esc(src)}" alt="${esc(s.name)}"></div>`
+        ? `<img class="thumb ${blur?'wazig':''}" src="${esc(src)}" alt="${esc(s.name)}">`
         : `<div class="thumb ${blur?'wazig':''}" style="display:flex;align-items:center;justify-content:center">${groupIcon(s.group,28)}</div>`;
 
     return `<div class="rowitem">${thumb}<div><b>${esc(s.name)}</b><br><span style="font-size:11px">${esc(s.group)} · ${esc(s.rarity)}</span>${hwText}</div><button class="link" data-edit="${esc(s.id)}">${canEdit?'Bewerk →':'Bekijk →'}</button></div>`;
@@ -235,12 +218,10 @@ function card(s){
         : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
     
     let topVisual = src 
-        ? `<div class="washi-wrapper"><img src="${esc(src)}" alt="${esc(s.name)}"></div>`
+        ? `<img src="${esc(src)}" alt="${esc(s.name)}">`
         : groupIcon(s.group, 52);
-    
-    let stempel = e?.seen ? `<div class="gezien-stempel">GEZIEN</div>` : '';
 
-    return `<div class="bird-card"><div class="bird-top">${topVisual}${stempel}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
+    return `<div class="bird-card"><div class="bird-top">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
 }
 
 function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}"><div class="stamp-name">${esc(s.name)}</div></div></div>`}
@@ -296,9 +277,9 @@ function modalHtml(){
     const hwText = e.date || e.location ? `<span class="handwritten" style="font-size:22px; margin-top:5px; padding-left:4px">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
     
     if(!canEdit){
-        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${src?`<div class="washi-wrapper" style="display:block;margin-bottom:20px"><img class="photo" style="height:auto;max-height:380px" src="${esc(src)}" alt="Eigen foto"></div>`:''}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
+        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${src?`<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`:''}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
     }
-    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<div class="washi-wrapper"><img class="photo" src="${esc(src)}" alt="Eigen foto"></div>`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
+    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
 }
 
 function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><div class="logo">Mijn Vogelboek<small>Vogels verzamelen</small></div><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos()}
