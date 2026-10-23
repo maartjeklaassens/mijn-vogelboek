@@ -6,194 +6,78 @@
 <meta name="theme-color" content="#c25977">
 <title>Mijn Vogelboek</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c25977'/%3E%3Cg transform='translate(4,4)' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 7h.01'/%3E%3Cpath d='M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20'/%3E%3Cpath d='m20 7 2 .5-2 .5'/%3E%3Cpath d='M10 18v3'/%3E%3Cpath d='M14 17.75V21'/%3E%3Cpath d='M7 18a6 6 0 0 0 3.84-10.61'/%3E%3C/g%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#4a2b33;background:#fcf5f7}*{box-sizing:border-box}body{margin:0}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.shell{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}.sidebar{background:#c25977;color:#fdf0f4;padding:27px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:20px}.logo{font-family:Georgia,serif;font-size:27px;letter-spacing:-.8px;padding:8px}.logo small{font:600 11px system-ui;display:block;letter-spacing:2px;color:#e8bac8;text-transform:uppercase;margin-top:5px}.nav{display:grid;gap:7px}.nav button{background:transparent;color:#f0d1dc;border:0;border-radius:11px;padding:13px 14px;text-align:left}.nav button.active,.nav button:hover{background:#a3425e;color:white}.sidebar .foot{margin-top:auto;font-size:12px;color:#e8bac8;line-height:1.6}.main{padding:38px clamp(20px,5vw,76px);max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:29px}.eyebrow{color:#9c6e7d;text-transform:uppercase;letter-spacing:2px;font-weight:750;font-size:11px}h1{font:normal clamp(34px,4vw,52px) Georgia,serif;letter-spacing:-1.8px;margin:7px 0 10px}h2{font:normal 28px Georgia,serif;margin:0 0 15px}h3{margin:0 0 8px;font-size:17px}.muted{color:#8f747d}.pill{background:#f5e1e8;color:#7a3c4f;border-radius:30px;padding:9px 14px;font-size:12px}.button{border:0;border-radius:12px;background:#c25977;color:white;padding:11px 17px;font-weight:650}.button.alt{background:#f5e1e8;color:#7a3c4f}.button.outline{background:transparent;border:1px solid #e3c1cd;color:#7a3c4f}.button.danger{background:#fae9e5;color:#8b362f}.hero{background:linear-gradient(112deg,#c25977,#d4738e);border-radius:22px;padding:32px;color:white;display:flex;justify-content:space-between;align-items:center;gap:24px;min-height:178px}.hero h2{font-size:34px;margin:0 0 8px}.hero p{color:#fcf0f3;max-width:540px;line-height:1.6;margin:0}.hero .bird{font-size:77px;line-height:1;opacity:.9}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0 30px}.stat,.panel,.bird-card{background:#fff;border:1px solid #f2e1e6;border-radius:16px;padding:21px}.stat b{display:block;font:normal 34px Georgia,serif;margin:8px 0 3px}.stat span{font-size:13px;color:#8f747d}.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:20px}.panel{padding:23px;margin-bottom:20px}.panel-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}.link{background:none;border:0;color:#a3425e;font-weight:700}.birds{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.bird-card{padding:0;overflow:hidden;display:flex;flex-direction:column}.bird-top{height:105px;background:#f5e1e8;display:flex;align-items:center;justify-content:center;font-size:51px;position:relative}.bird-top img{width:100%;height:100%;object-fit:cover}.flag{position:absolute;right:10px;top:10px;background:white;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:700;color:#7a3c4f}.bird-info{padding:16px;flex:1}.bird-info b{display:block;margin-bottom:4px}.bird-info small{display:block;color:#a18790;font-style:italic}.bird-bottom{display:flex;border-top:1px solid #f5e1e8}.bird-bottom button{width:50%;padding:11px 6px;background:white;border:0;color:#7a3c4f;font-size:12px}.bird-bottom button+button{border-left:1px solid #f5e1e8}.bird-bottom button:hover{background:#fcf5f7}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.input,.select,.textarea{padding:12px;border:1px solid #ebd3dc;border-radius:10px;background:white;color:#4a2b33;width:100%;outline-color:#c25977}.input[type=file]{padding:8px}.search{max-width:370px}.filterbar{display:flex;gap:10px;flex-wrap:wrap}.filterbar .select{width:auto;min-width:155px}.empty{color:#9c858d;padding:35px;text-align:center;background:white;border:1px dashed #ebd3dc;border-radius:16px}.rowitem{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f2e1e6}.rowitem:last-child{border:0}.rowitem .emoji{font-size:27px}.rowitem span{font-size:13px;color:#8f747d}.rowitem button{margin-left:auto}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}.formfield{display:grid;gap:7px;margin-bottom:15px;font-size:13px;font-weight:650}.formfield small{color:#9c858d;font-weight:400}.overlay{position:fixed;inset:0;background:#2b151db0;display:grid;place-items:center;padding:16px;z-index:10}.modal{background:#fff;border-radius:21px;padding:26px;width:min(550px,100%);max-height:94vh;overflow:auto;box-shadow:0 30px 90px #0003}.modalhead{display:flex;justify-content:space-between;align-items:center}.x{border:0;background:#f5e1e8;color:#7a3c4f;width:34px;height:34px;border-radius:50%;font-size:20px}.notice{background:#fff4d8;color:#785b25;border-radius:12px;padding:13px 16px;font-size:13px;line-height:1.5;margin:15px 0}.success{background:#fdf2f5;color:#85304f}.error{background:#ffebeb;color:#982d2d}.photo{height:200px;width:100%;object-fit:cover;border-radius:12px}.sectionlead{line-height:1.6;color:#8f747d}
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#4a2b33;background:#fcf5f7}*{box-sizing:border-box}body{margin:0;position:relative}
 
-/* --- STRAKKE UITLIJNING VOOR STATISTIEKEN BALKEN --- */
-.chartline{display:flex;align-items:center;gap:14px;margin:13px 0;font-size:13px}
-.chartline label{width:210px;flex-shrink:0;line-height:1.35}
-.track{height:12px;background:#f5e1e8;flex:1;border-radius:20px;overflow:hidden}
-.track>div{height:100%;background:#c25977;border-radius:20px}
-.chartline span{width:48px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;color:#8f747d}
+/* Subtiele papier-textuur over de hele site */
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9999; background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23f)" opacity="0.05"/></svg>'); mix-blend-mode: multiply; }
 
-.setup{padding:18px;background:#fdf5f7;border-radius:14px;font-size:13px;line-height:1.8}.mobile-nav{display:none}a{color:#a3425e}.thumb{width:55px;height:55px;object-fit:cover;border-radius:10px;background:#f5e1e8}.toolbar{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:center}.right{display:flex;align-items:center;gap:8px}.counter{font-size:13px;color:#a18790}.account{border-top:1px solid #f2e1e6;padding-top:12px}.account button{margin-top:8px;width:100%}@media(max-width:950px){.shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-nav{display:flex;position:fixed;z-index:5;bottom:0;background:#c25977;width:100%;justify-content:space-around;padding:10px 4px 14px}.mobile-nav button{border:0;color:#f0d1dc;background:transparent;font-size:11px;display:grid;justify-items:center;gap:3px}.mobile-nav button.active{color:white;font-weight:800}.main{padding:23px 16px 90px}.stats{grid-template-columns:repeat(2,1fr)}.layout,.grid2{grid-template-columns:1fr}.hero{padding:23px}.hero .bird{display:none}.top{align-items:start}.pill{font-size:10px}}@media(max-width:550px){.birds{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.bird-info{padding:11px}.bird-top{height:95px}.bird-info b{font-size:14px}.stat{padding:14px}.stat b{font-size:28px}.filterbar .select,.search{width:100%;max-width:100%}.panel{padding:16px}.chartline label{width:135px;font-size:12px}.chartline span{width:42px;font-size:12px}}
+button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.shell{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}.sidebar{background:#c25977;color:#fdf0f4;padding:27px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:20px}.logo{font-family:Georgia,serif;font-size:27px;letter-spacing:-.8px;padding:8px}.logo small{font:600 11px system-ui;display:block;letter-spacing:2px;color:#e8bac8;text-transform:uppercase;margin-top:5px}.nav{display:grid;gap:7px}.nav button{background:transparent;color:#f0d1dc;border:0;border-radius:11px;padding:13px 14px;text-align:left;transition:all 0.2s}.nav button.active,.nav button:hover{background:#a3425e;color:white}.sidebar .foot{margin-top:auto;font-size:12px;color:#e8bac8;line-height:1.6}.main{padding:38px clamp(20px,5vw,76px);max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:29px}.eyebrow{color:#9c6e7d;text-transform:uppercase;letter-spacing:2px;font-weight:750;font-size:11px}h1{font:normal clamp(34px,4vw,52px) Georgia,serif;letter-spacing:-1.8px;margin:7px 0 10px}h2{font:normal 28px Georgia,serif;margin:0 0 15px}h3{margin:0 0 8px;font-size:17px}.muted{color:#8f747d}.pill{background:#f5e1e8;color:#7a3c4f;border-radius:30px;padding:9px 14px;font-size:12px}.button{border:0;border-radius:12px;background:#c25977;color:white;padding:11px 17px;font-weight:650;transition:transform 0.1s}.button:active{transform:scale(0.97)}.button.alt{background:#f5e1e8;color:#7a3c4f}.button.outline{background:transparent;border:1px solid #e3c1cd;color:#7a3c4f}.button.danger{background:#fae9e5;color:#8b362f}.hero{background:linear-gradient(112deg,#c25977,#d4738e);border-radius:22px;padding:32px;color:white;display:flex;justify-content:space-between;align-items:center;gap:24px;min-height:178px;transition:background 0.5s}.hero h2{font-size:34px;margin:0 0 8px}.hero p{max-width:540px;line-height:1.6;margin:0;opacity:0.9}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0 30px}.stat,.panel,.bird-card{background:#fff;border:1px solid #f2e1e6;border-radius:16px;padding:21px}.stat b{display:block;font:normal 34px Georgia,serif;margin:8px 0 3px}.stat span{font-size:13px;color:#8f747d}.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:20px}.panel{padding:23px;margin-bottom:20px}.panel-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}.link{background:none;border:0;color:#a3425e;font-weight:700}.birds{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.bird-card{padding:0;overflow:hidden;display:flex;flex-direction:column;position:relative}.bird-top{height:105px;background:#f5e1e8;display:flex;align-items:center;justify-content:center;font-size:51px;position:relative;overflow:hidden}.bird-top img{width:100%;height:100%;object-fit:cover}.flag{position:absolute;right:10px;top:10px;background:white;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:700;color:#7a3c4f;z-index:2}.bird-info{padding:16px;flex:1}.bird-info b{display:block;margin-bottom:4px}.bird-info small{display:block;color:#a18790;font-style:italic}.bird-bottom{display:flex;border-top:1px solid #f5e1e8}.bird-bottom button{width:50%;padding:11px 6px;background:white;border:0;color:#7a3c4f;font-size:12px;transition:background 0.2s}.bird-bottom button+button{border-left:1px solid #f5e1e8}.bird-bottom button:hover{background:#fcf5f7}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.input,.select,.textarea{padding:12px;border:1px solid #ebd3dc;border-radius:10px;background:white;color:#4a2b33;width:100%;outline-color:#c25977}.input[type=file]{padding:8px}.search{max-width:370px}.filterbar{display:flex;gap:10px;flex-wrap:wrap}.filterbar .select{width:auto;min-width:155px}.empty{color:#9c858d;padding:35px;text-align:center;background:white;border:1px dashed #ebd3dc;border-radius:16px}.rowitem{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f2e1e6}.rowitem:last-child{border:0}.rowitem span{font-size:13px;color:#8f747d}.rowitem button{margin-left:auto}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}.formfield{display:grid;gap:7px;margin-bottom:15px;font-size:13px;font-weight:650}.formfield small{color:#9c858d;font-weight:400}.overlay{position:fixed;inset:0;background:#2b151db0;display:grid;place-items:center;padding:16px;z-index:10}.modal{background:#fff;border-radius:21px;padding:26px;width:min(550px,100%);max-height:94vh;overflow:auto;box-shadow:0 30px 90px #0003}.modalhead{display:flex;justify-content:space-between;align-items:center}.x{border:0;background:#f5e1e8;color:#7a3c4f;width:34px;height:34px;border-radius:50%;font-size:20px}.notice{background:#fff4d8;color:#785b25;border-radius:12px;padding:13px 16px;font-size:13px;line-height:1.5;margin:15px 0}.success{background:#fdf2f5;color:#85304f}.error{background:#ffebeb;color:#982d2d}.photo{height:200px;width:100%;object-fit:cover;border-radius:12px}.sectionlead{line-height:1.6;color:#8f747d}.chartline{display:flex;align-items:center;gap:14px;margin:13px 0;font-size:13px}.chartline label{width:210px;flex-shrink:0;line-height:1.35}.track{height:12px;background:#f5e1e8;flex:1;border-radius:20px;overflow:hidden}.track>div{height:100%;background:#c25977;border-radius:20px}.chartline span{width:48px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;color:#8f747d}.setup{padding:18px;background:#fdf5f7;border-radius:14px;font-size:13px;line-height:1.8}.mobile-nav{display:none}a{color:#a3425e}.thumb{width:55px;height:55px;object-fit:cover;border-radius:10px;background:#f5e1e8}.toolbar{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:center}.counter{font-size:13px;color:#a18790}.account{border-top:1px solid #f2e1e6;padding-top:12px}.account button{margin-top:8px;width:100%}
+
+/* --- NIEUWE SFEER EFFECTEN --- */
+
+/* Tijd-afhankelijke Hero Banner */
+.hero.morning { background: linear-gradient(112deg, #ff8c7a, #f7c3b2); }
+.hero.night { background: linear-gradient(112deg, #1b263b, #415a77); }
+
+/* Handgeschreven tekst (vulpen effect) */
+.handwritten { font-family: 'Caveat', cursive; font-size: 19px; color: #1e3a5f; transform: rotate(-2deg); display: inline-block; padding-top: 4px; }
+
+/* Washi-tape voor foto's */
+.washi-wrapper { position: relative; display: inline-block; width: 100%; height: 100%; }
+.washi-wrapper::after { content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(-3deg); width: 60px; height: 18px; background: rgba(255, 253, 240, 0.7); box-shadow: 0 1px 3px rgba(0,0,0,0.1); backdrop-filter: blur(1px); z-index: 10; border-radius: 1px; border-left: 2px dashed rgba(0,0,0,0.05); border-right: 2px dashed rgba(0,0,0,0.05); }
+
+/* "GEZIEN" stempel-animatie */
+.gezien-stempel { position: absolute; top: 15px; left: 10px; border: 3px solid #a3425e; color: #a3425e; font-family: 'Courier New', Courier, monospace; font-weight: 800; font-size: 16px; padding: 2px 10px; border-radius: 4px; transform: rotate(-15deg); opacity: 0; z-index: 3; pointer-events: none; animation: stampIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes stampIn { 0% { transform: scale(2.5) rotate(0deg); opacity: 0; } 100% { transform: scale(1) rotate(-15deg); opacity: 0.85; } }
+
+/* Wazig silhouet (Verrekijker zoeken) */
+.wazig { filter: blur(5px) grayscale(100%); transition: filter 0.4s ease, transform 0.4s ease; cursor: crosshair; }
+.wazig:hover { filter: blur(0) grayscale(0%); transform: scale(1.1); }
+
+/* Hupje van de vogel-silhouetten */
+.bird-top svg { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.bird-card:hover .bird-top svg { transform: translateY(-5px); }
+
+/* Verzamelaars-badges */
+.badges-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; }
+.badge { border: 2px dashed #ebd3dc; border-radius: 50%; width: 120px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; background: white; transition: all 0.3s; margin: 0 auto; position: relative; }
+.badge.locked { filter: grayscale(100%); opacity: 0.4; }
+.badge.won { border-color: #c25977; background: #fdf5f7; box-shadow: 0 8px 20px rgba(194,89,119,0.15); transform: scale(1.05) rotate(2deg); }
+.badge div { font-size: 26px; line-height: 1; margin-bottom: 4px; }
+.badge b { font-size: 12px; color: #4a2b33; line-height: 1.1; }
+.badge span { font-size: 10px; color: #8f747d; margin-top: 4px; line-height: 1.2; }
+
+/* Vallende veertjes */
+.feather { position: fixed; top: -50px; z-index: 10000; animation: fall linear forwards; pointer-events: none; }
+@keyframes fall { 0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg) translateX(150px); opacity: 0; } }
+
+@media(max-width:950px){.shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-nav{display:flex;position:fixed;z-index:5;bottom:0;background:#c25977;width:100%;justify-content:space-around;padding:10px 4px 14px}.mobile-nav button{border:0;color:#f0d1dc;background:transparent;font-size:11px;display:grid;justify-items:center;gap:3px}.mobile-nav button.active{color:white;font-weight:800}.main{padding:23px 16px 90px}.stats{grid-template-columns:repeat(2,1fr)}.layout,.grid2{grid-template-columns:1fr}.hero{padding:23px; flex-direction:column; text-align:center}.top{align-items:start}.pill{font-size:10px}}
+@media(max-width:550px){.birds{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.bird-info{padding:11px}.bird-top{height:95px}.bird-info b{font-size:14px}.stat{padding:14px}.stat b{font-size:28px}.filterbar .select,.search{width:100%;max-width:100%}.panel{padding:16px}.chartline label{width:135px;font-size:12px}.chartline span{width:42px;font-size:12px}}
 
 /* --- START SCHERM CSS --- */
-#start-screen {
-    position: fixed;
-    inset: 0;
-    background-color: white;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: opacity 0.5s ease-in-out;
-}
-#start-screen h1 {
-    font-family: Georgia, serif;
-    font-size: clamp(3rem, 10vw, 8rem);
-    color: #c25977;
-    margin: 0 0 40px 0;
-    text-align: center;
-    user-select: none;
-    z-index: 10;
-    pointer-events: none;
-}
-.start-btn {
-    background-color: #c25977;
-    color: white;
-    border: none;
-    border-radius: 40px;
-    padding: 16px 48px;
-    font-size: 1.25rem;
-    font-weight: 600;
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    box-shadow: 0 4px 14px rgba(194, 89, 119, 0.25);
-    z-index: 10; 
-}
-.start-btn:hover {
-    background-color: #a3425e;
-    transform: scale(1.05);
-}
-.cursor-bird {
-    position: absolute;
-    width: 150px;
-    height: auto;
-    pointer-events: none;
-    z-index: 5;
-    transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-    opacity: 1;
-    transform-origin: center center;
-}
+#start-screen { position: fixed; inset: 0; background-color: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; transition: opacity 0.5s ease-in-out; }
+#start-screen h1 { font-family: Georgia, serif; font-size: clamp(3rem, 10vw, 8rem); color: #c25977; margin: 0 0 40px 0; text-align: center; user-select: none; z-index: 10; pointer-events: none; }
+.start-btn { background-color: #c25977; color: white; border: none; border-radius: 40px; padding: 16px 48px; font-size: 1.25rem; font-weight: 600; font-family: Inter, ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: transform 0.2s, background-color 0.2s; box-shadow: 0 4px 14px rgba(194, 89, 119, 0.25); z-index: 10; }
+.start-btn:hover { background-color: #a3425e; transform: scale(1.05); }
+.cursor-bird { position: absolute; width: 150px; height: auto; pointer-events: none; z-index: 5; transition: opacity 0.4s ease-out, transform 0.4s ease-out; opacity: 1; transform-origin: center center; }
 
-/* --- FOTO COLLAGE & POSTZEGEL CSS --- */
-.photo-collage {
-    column-count: 3;
-    column-gap: 22px;
-    margin-top: 15px;
-}
-.stamp-wrapper {
-    break-inside: avoid;
-    margin-bottom: 22px;
-    filter: drop-shadow(0 6px 14px rgba(194, 89, 119, 0.16));
-    transition: transform 0.2s ease;
-    display: inline-block;
-    width: 100%;
-    cursor: pointer;
-}
-.stamp-wrapper:hover {
-    transform: scale(1.02) rotate(-1.5deg);
-}
-.stamp-card {
-    background-color: white;
-    padding: 14px;
-    padding-bottom: 44px;
-    position: relative;
-    
-    --hole: radial-gradient(circle, transparent 4px, black 4.5px);
-    
-    -webkit-mask-image: 
-        linear-gradient(black, black),
-        var(--hole),
-        var(--hole),
-        var(--hole),
-        var(--hole);
-    -webkit-mask-size: 
-        calc(100% - 12px) calc(100% - 12px),
-        12px 12px,
-        12px 12px,
-        12px 12px,
-        12px 12px;
-    -webkit-mask-position: 
-        center,
-        0 -6px,
-        0 calc(100% + 6px),
-        -6px 0,
-        calc(100% + 6px) 0;
-    -webkit-mask-repeat: 
-        no-repeat,
-        space no-repeat,
-        space no-repeat,
-        no-repeat space,
-        no-repeat space;
+/* Foto Collage */
+.photo-collage { column-count: 3; column-gap: 22px; margin-top: 15px; }
+.stamp-wrapper { break-inside: avoid; margin-bottom: 22px; filter: drop-shadow(0 6px 14px rgba(194, 89, 119, 0.16)); transition: transform 0.2s ease; display: inline-block; width: 100%; cursor: pointer; }
+.stamp-wrapper:hover { transform: scale(1.02) rotate(-1.5deg); }
+.stamp-card { background-color: white; padding: 14px; padding-bottom: 44px; position: relative; --hole: radial-gradient(circle, transparent 4px, black 4.5px); -webkit-mask-image: linear-gradient(black, black), var(--hole), var(--hole), var(--hole), var(--hole); -webkit-mask-size: calc(100% - 12px) calc(100% - 12px), 12px 12px, 12px 12px, 12px 12px, 12px 12px; -webkit-mask-position: center, 0 -6px, 0 calc(100% + 6px), -6px 0, calc(100% + 6px) 0; -webkit-mask-repeat: no-repeat, space no-repeat, space no-repeat, no-repeat space, no-repeat space; mask-image: linear-gradient(black, black), var(--hole), var(--hole), var(--hole), var(--hole); mask-size: calc(100% - 12px) calc(100% - 12px), 12px 12px, 12px 12px, 12px 12px, 12px 12px; mask-position: center, 0 -6px, 0 calc(100% + 6px), -6px 0, calc(100% + 6px) 0; mask-repeat: no-repeat, space no-repeat, space no-repeat, no-repeat space, no-repeat space; }
+.stamp-card img { width: 100%; height: auto; display: block; border-radius: 2px; object-fit: cover; }
+.stamp-name { position: absolute; bottom: 0; left: 0; right: 0; height: 44px; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 14.5px; color: #4a2b33; font-weight: 400; letter-spacing: 0.2px; }
 
-    mask-image: 
-        linear-gradient(black, black),
-        var(--hole),
-        var(--hole),
-        var(--hole),
-        var(--hole);
-    mask-size: 
-        calc(100% - 12px) calc(100% - 12px),
-        12px 12px,
-        12px 12px,
-        12px 12px,
-        12px 12px;
-    mask-position: 
-        center,
-        0 -6px,
-        0 calc(100% + 6px),
-        -6px 0,
-        calc(100% + 6px) 0;
-    mask-repeat: 
-        no-repeat,
-        space no-repeat,
-        space no-repeat,
-        no-repeat space,
-        no-repeat space;
-}
-.stamp-card img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 2px;
-    object-fit: cover;
-}
-.stamp-name {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: Georgia, serif;
-    font-size: 14.5px;
-    color: #4a2b33;
-    font-weight: 400;
-    letter-spacing: 0.2px;
-}
-
-@media (max-width: 950px) {
-    .photo-collage { column-count: 2; }
-}
-@media (max-width: 550px) {
-    .photo-collage { 
-        column-count: 2; 
-        column-gap: 12px; 
-    }
-    .stamp-wrapper { 
-        margin-bottom: 12px; 
-    }
-    .stamp-card {
-        padding: 10px;
-        padding-bottom: 36px;
-    }
-    .stamp-name {
-        height: 36px;
-        font-size: 12.5px;
-    }
-}
+@media (max-width: 950px) { .photo-collage { column-count: 2; } }
+@media (max-width: 550px) { .photo-collage { column-count: 2; column-gap: 12px; } .stamp-wrapper { margin-bottom: 12px; } .stamp-card { padding: 10px; padding-bottom: 36px; } .stamp-name { height: 36px; font-size: 12.5px; } }
 </style>
 </head>
 <body>
 
-<!-- DE STARTPAGINA met CURSOR EFFECT -->
+<!-- START SCHERM -->
 <div id="start-screen">
     <h1>Mijn Vogelboek</h1>
     <button id="start-btn" class="start-btn">Doorgaan</button>
@@ -201,9 +85,9 @@
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=18"></script>
+<script type="module" src="./app.js?v=21"></script>
 
-<!-- STARTPAGINA & CURSOR LOGICA -->
+<!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
     const startBtn = document.getElementById('start-btn');
     const startScreen = document.getElementById('start-screen');
@@ -216,43 +100,38 @@
     startBtn.addEventListener('click', function() {
         window.location.hash = 'dashboard';
         startScreen.style.opacity = '0';
-        setTimeout(() => {
-            startScreen.style.display = 'none';
-        }, 500); 
+        setTimeout(() => { startScreen.style.display = 'none'; }, 500); 
     });
 
     window.addEventListener('hashchange', function() {
         if (!window.location.hash || window.location.hash === '#') {
             startScreen.style.display = 'flex';
-            requestAnimationFrame(() => {
-                startScreen.style.opacity = '1';
-            });
+            requestAnimationFrame(() => { startScreen.style.opacity = '1'; });
         } else {
             startScreen.style.opacity = '0';
             setTimeout(() => {
-                if (window.location.hash && window.location.hash !== '#') {
-                    startScreen.style.display = 'none';
-                }
+                if (window.location.hash && window.location.hash !== '#') startScreen.style.display = 'none';
             }, 500);
         }
     });
 
-const birdFiles = [
-        'bijeneter.png', 'blauwborst.png', 'flamingo.png',
+    const birdFiles = [
+        'bijeneter.png', 'blauwborst.png', 'flamingo.png', 'gaai.png',
         'geelgord.png', 'goudvink.png', 'grauwekiekendief.png', 'groenling.png',
         'grotebontespecht.png', 'halsbandparkiet.png', 'huismus.png', 'ijsvogel.png',
-        'kerkuil.png', 'kluut.png', 'merel.png',
+        'kerkuil.png', 'kluut.png', 'merel.png', 'middelstezaagbek.png',
         'nonnetje.png', 'pestvogel.png', 'rietgors.png', 'roodborst.png',
-        'roodborsttapuit.png', 'roodmus.png', 'rossefranjepoot.png',
+        'roodborsttapuit.png', 'roodmus.png', 'rossefranjepoot.png', 'sijs.png',
         'smient.png', 'staartmees.png', 'stadsduif.png', 'wielewaal.png',
         'zeearend.png', 'zeekoet.png', 'zwarteibis.png', 'zwarteooievaar.png'
     ];
 
-    // Echte willekeurige mix zodat je pas na alle 32 vogels dezelfde terugziet
     for (let i = birdFiles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [birdFiles[i], birdFiles[j]] = [birdFiles[j], birdFiles[i]];
     }
+
+    birdFiles.forEach(file => { const img = new Image(); img.src = `./vogel_tekeningen/${file}`; });
 
     let currentBirdIndex = 0;
     let activeBirds = [];
@@ -260,22 +139,11 @@ const birdFiles = [
     const SPAWN_DISTANCE = 120; 
     const MAX_BIRDS = 5; 
 
-    startScreen.addEventListener('mousemove', function(e) {
-        handlePointerMove(e.clientX, e.clientY);
-    });
-
-    startScreen.addEventListener('touchmove', function(e) {
-        const touch = e.touches[0];
-        handlePointerMove(touch.clientX, touch.clientY);
-    });
-
     function handlePointerMove(x, y) {
         const dx = x - lastSpawnPos.x;
         const dy = y - lastSpawnPos.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance > SPAWN_DISTANCE) {
-            lastSpawnPos = { x: x, y: y };
+        if (Math.sqrt(dx * dx + dy * dy) > SPAWN_DISTANCE) {
+            lastSpawnPos = { x, y };
             spawnBird(x, y);
         }
     }
@@ -284,26 +152,24 @@ const birdFiles = [
         const img = document.createElement('img');
         img.src = `./vogel_tekeningen/${birdFiles[currentBirdIndex]}`;
         img.className = 'cursor-bird';
-        
-        const rotation = Math.random() * 40 - 20;
         img.style.left = `${x}px`;
         img.style.top = `${y}px`;
-        img.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+        img.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 40 - 20}deg)`;
         
         startScreen.appendChild(img);
         activeBirds.push(img);
-
         currentBirdIndex = (currentBirdIndex + 1) % birdFiles.length;
 
         if (activeBirds.length > MAX_BIRDS) {
             const oldBird = activeBirds.shift();
             oldBird.style.opacity = '0';
-            oldBird.style.transform = oldBird.style.transform + ' scale(0.8)'; 
-            setTimeout(() => {
-                if(oldBird.parentNode) oldBird.parentNode.removeChild(oldBird);
-            }, 400); 
+            oldBird.style.transform += ' scale(0.8)'; 
+            setTimeout(() => { if(oldBird.parentNode) oldBird.parentNode.removeChild(oldBird); }, 400); 
         }
     }
+
+    startScreen.addEventListener('mousemove', e => handlePointerMove(e.clientX, e.clientY));
+    startScreen.addEventListener('touchmove', e => handlePointerMove(e.touches[0].clientX, e.touches[0].clientY));
 </script>
 </body>
 </html>
