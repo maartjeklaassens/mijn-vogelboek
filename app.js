@@ -1,4 +1,4 @@
-import {seed} from './species.js?v=22';
+import {seed} from './species.js?v=23';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -60,6 +60,13 @@ const groupPaths = {
 function groupIcon(groupName, size=48){
     const path = groupPaths[groupName] || groupPaths["Zangers"];
     return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="#a3425e" style="opacity:0.82;display:block">${path}</svg>`;
+}
+
+// Haalt de vogelsticker op van GitHub (via jsDelivr) of gebruikt het roze SVG silhouet als het mislukt
+function getDefaultImg(s, size) {
+    const stUrl = `https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/stickers/${s.scientific.replace(/ /g, '_')}.png`;
+    const fallback = `data:image/svg+xml,${encodeURIComponent(groupIcon(s.group, size))}`;
+    return { url: stUrl, fallback: fallback };
 }
 
 function getHashPage(){
@@ -204,9 +211,14 @@ function dashboard(){
 function rowitem(s, blur=false){
     let e=entries[s.id],src=e?.photo||photoCache[s.id];
     let hwText = e?.date || e?.location ? `<br><span class="handwritten">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
-    let thumb = src 
-        ? `<img class="thumb ${blur?'wazig':''}" src="${esc(src)}" alt="${esc(s.name)}">`
-        : `<div class="thumb ${blur?'wazig':''}" style="display:flex;align-items:center;justify-content:center">${groupIcon(s.group,28)}</div>`;
+    
+    let thumb = "";
+    if (src) {
+        thumb = `<img class="thumb ${blur?'wazig':''}" src="${esc(src)}" alt="${esc(s.name)}">`;
+    } else {
+        const def = getDefaultImg(s, 28);
+        thumb = `<img class="thumb ${blur?'wazig':''}" src="${def.url}" onerror="this.onerror=null;this.src='${def.fallback}'" alt="${esc(s.name)}" style="object-fit:contain; background:transparent">`;
+    }
 
     return `<div class="rowitem">${thumb}<div><b>${esc(s.name)}</b><br><span style="font-size:11px">${esc(s.group)} · ${esc(s.rarity)}</span>${hwText}</div><button class="link" data-edit="${esc(s.id)}">${canEdit?'Bewerk →':'Bekijk →'}</button></div>`;
 }
@@ -217,9 +229,13 @@ function card(s){
         ? `<div class="bird-bottom"><button data-toggle="${esc(s.id)}">${e?.seen?'✓ Gezien':'＋ Gezien'}</button><button data-edit="${esc(s.id)}">Details →</button></div>`
         : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
     
-    let topVisual = src 
-        ? `<img src="${esc(src)}" alt="${esc(s.name)}">`
-        : groupIcon(s.group, 52);
+    let topVisual = "";
+    if (src) {
+        topVisual = `<img src="${esc(src)}" alt="${esc(s.name)}">`;
+    } else {
+        const def = getDefaultImg(s, 52);
+        topVisual = `<img src="${def.url}" style="width:auto;height:85px;object-fit:contain" onerror="this.onerror=null;this.src='${def.fallback}';this.style.width='100%';this.style.height='100%';this.style.objectFit='none'" alt="${esc(s.name)}">`;
+    }
 
     return `<div class="bird-card"><div class="bird-top">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
 }
@@ -276,10 +292,18 @@ function modalHtml(){
     const e=entries[s.id]||{}, src=e.photo||photoCache[s.id];
     const hwText = e.date || e.location ? `<span class="handwritten" style="font-size:22px; margin-top:5px; padding-left:4px">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
     
-    if(!canEdit){
-        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${src?`<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`:''}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
+    let photoHtml = "";
+    if (src) {
+        photoHtml = `<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`;
+    } else {
+        const def = getDefaultImg(s, 120);
+        photoHtml = `<div style="text-align:center; margin-bottom:16px; background:#f5e1e8; border-radius:12px; padding:20px; display:flex; justify-content:center"><img style="max-height:160px; max-width:100%" src="${def.url}" onerror="this.onerror=null;this.src='${def.fallback}'" alt="Sticker"></div>`;
     }
-    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
+
+    if(!canEdit){
+        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${photoHtml}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
+    }
+    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${photoHtml}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
 }
 
 function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><div class="logo">Mijn Vogelboek<small>Vogels verzamelen</small></div><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos()}
