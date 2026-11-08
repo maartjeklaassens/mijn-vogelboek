@@ -1,4 +1,4 @@
-import {seed} from './species.js?v=24';
+import {seed} from './species.js?v=25';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -57,59 +57,26 @@ const groupPaths = {
     "Gevestigde exoten": `<path d="M16.5 6.5c-1.8 0-3.2 1.4-3.2 3.2 0 .7.2 1.3.6 1.8-2.8.4-5.6 2.2-7.6 5.2L2.8 21l1.6 1.2 3.2-2c1.5.7 3.2 1.1 5 1.1 4 0 6.8-2.5 6.8-6 0-1.5-.5-2.8-1.4-3.8.5-.6.8-1.3.8-2.2 0-1.6-1.1-2.8-2.3-2.8zm2.3 1.2c1.6.2 2.8 1.2 2.8 2.6l-1.4.4c-.2-.8-.7-1.3-1.4-1.5V7.7zM11.2 21.3v2.2h1.5v-2.2h-1.5zm2.8 0v2.2h1.5v-2.2H14z"/>`
 };
 
-// Slimme koppeling: Nederlandse groep -> Wetenschappelijke ordes
-const groupOrders = {
-    "Zwanen en ganzen": ["Anseriformes"],
-    "Eenden en zaagbekken": ["Anseriformes"],
-    "Hoenderachtigen": ["Galliformes"],
-    "Futen en flamingo's": ["Podicipediformes", "Phoenicopteriformes"],
-    "Duiven en zandhoenders": ["Columbiformes", "Pterocliformes"],
-    "Nachtzwaluwen, gierzwaluwen en koekoeken": ["Caprimulgiformes", "Apodiformes", "Cuculiformes"],
-    "Rallen, kraanvogels en trappen": ["Gruiformes", "Otidiformes"],
-    "Duikers en stormvogels": ["Gaviiformes", "Procellariiformes"],
-    "Ooievaars, pelikanen, reigers en lepelaars": ["Ciconiiformes", "Pelecaniformes", "Suliformes"],
-    "Genten en aalscholvers": ["Suliformes"],
-    "Plevieren, kluten en kieviten": ["Charadriiformes"],
-    "Wulpen, ruiters en snippen": ["Charadriiformes"],
-    "Strandlopers en franjepoten": ["Charadriiformes"],
-    "Alkachtigen en jagers": ["Charadriiformes"],
-    "Meeuwen": ["Charadriiformes"],
-    "Sterns": ["Charadriiformes"],
-    "Roofvogels": ["Accipitriformes", "Pandioniformes", "Falconiformes"],
-    "Uilen": ["Strigiformes"],
-    "Hop, ijsvogels en spechten": ["Bucerotiformes", "Coraciiformes", "Piciformes"],
-    "Valken": ["Falconiformes"],
-    "Gevestigde exoten": ["Anseriformes", "Galliformes", "Columbiformes", "Psittaciformes", "Passeriformes", "Pelecaniformes"]
-};
-
 function groupIcon(groupName, size=48){
     const path = groupPaths[groupName] || groupPaths["Zangers"];
     return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="#a3425e" style="opacity:0.82;display:block;margin:auto">${path}</svg>`;
 }
 
-// Bouwt de automatische image-tag mét intelligent terugval-mechanisme per orde
-function getStickerHtml(s, size, extraClass="", isCard=false) {
-    const orders = groupOrders[s.group] || ["Passeriformes"];
-    const sName = s.scientific.replace(/ /g, '_');
-    const base = "https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/stickers/";
+// 100% Waterdichte methode om de sticker in te laden met de directe GitHub URL
+function getStickerHtml(s, size, extraClass="") {
+    const base = "https://raw.githubusercontent.com/alchaincyf/huashu-bird-sticker/main/stickers/";
+    const n1 = s.scientific.replace(/ /g, '_');
+    const n2 = s.scientific.toLowerCase().replace(/ /g, '_');
     
-    // Maak een lijstje van alle mogelijke mappen voor deze vogel
-    const urls = orders.map(o => base + o + "/" + sName + ".png");
-    const fallbackUrls = JSON.stringify(urls.slice(1)).replace(/"/g, '&quot;');
-    const finalSvg = `data:image/svg+xml,${encodeURIComponent(groupIcon(s.group, size))}`;
-    
-    // Als de eerste link breekt, probeert de HTML automatisch de volgende ordes (en als laatste het roze silhouet)
-    const errorAction = isCard 
-        ? `let f=JSON.parse(this.dataset.fallbacks); if(f.length){this.src=f.shift(); this.dataset.fallbacks=JSON.stringify(f);} else {this.onerror=null; this.src=this.dataset.final; this.style.width='100%'; this.style.height='100%'; this.style.objectFit='none';}`
-        : `let f=JSON.parse(this.dataset.fallbacks); if(f.length){this.src=f.shift(); this.dataset.fallbacks=JSON.stringify(f);} else {this.onerror=null; this.src=this.dataset.final;}`;
-
-    const style = isCard ? 'width:auto;height:85px;object-fit:contain;' : 'object-fit:contain;background:transparent;';
-    
-    return `<img class="${extraClass}" src="${urls[0]}" 
-        data-fallbacks="${fallbackUrls}" 
-        data-final="${finalSvg}"
-        onerror="${errorAction}" 
-        alt="${esc(s.name)}" style="${style}">`;
+    return `<div class="${extraClass}" style="position:relative; display:flex; align-items:center; justify-content:center; width:100%; height:100%; overflow:hidden;">
+        <img src="${base}${n1}.png" 
+             onerror="if(this.dataset.t!=='1'){this.dataset.t='1'; this.src='${base}${n2}.png';} else {this.style.display='none'; this.nextElementSibling.style.display='flex';}" 
+             style="width:100%; height:100%; object-fit:contain;" 
+             alt="${esc(s.name)}">
+        <div class="fallback-icon" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
+            ${groupIcon(s.group, size)}
+        </div>
+    </div>`;
 }
 
 function getHashPage(){
@@ -257,7 +224,7 @@ function rowitem(s, blur=false){
     
     let thumb = src 
         ? `<img class="thumb ${blur?'wazig':''}" src="${esc(src)}" alt="${esc(s.name)}">`
-        : getStickerHtml(s, 28, `thumb ${blur?'wazig':''}`, false);
+        : getStickerHtml(s, 28, `thumb ${blur?'wazig':''}`);
 
     return `<div class="rowitem">${thumb}<div><b>${esc(s.name)}</b><br><span style="font-size:11px">${esc(s.group)} · ${esc(s.rarity)}</span>${hwText}</div><button class="link" data-edit="${esc(s.id)}">${canEdit?'Bewerk →':'Bekijk →'}</button></div>`;
 }
@@ -269,8 +236,8 @@ function card(s){
         : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
     
     let topVisual = src 
-        ? `<img src="${esc(src)}" alt="${esc(s.name)}">`
-        : getStickerHtml(s, 52, "", true);
+        ? `<img src="${esc(src)}" alt="${esc(s.name)}" style="width:100%;height:100%;object-fit:cover;">`
+        : getStickerHtml(s, 52);
 
     return `<div class="bird-card"><div class="bird-top">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
 }
@@ -329,7 +296,7 @@ function modalHtml(){
     
     let photoHtml = src 
         ? `<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`
-        : `<div style="text-align:center; margin-bottom:16px; background:#f5e1e8; border-radius:12px; padding:20px; display:flex; justify-content:center">${getStickerHtml(s, 120, "", false).replace('object-fit:contain;background:transparent;', 'max-height:160px; max-width:100%; object-fit:contain;')}</div>`;
+        : `<div style="text-align:center; margin-bottom:16px; background:#f5e1e8; border-radius:12px; padding:20px; display:flex; justify-content:center; height:200px;">${getStickerHtml(s, 120)}</div>`;
 
     if(!canEdit){
         return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${photoHtml}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
