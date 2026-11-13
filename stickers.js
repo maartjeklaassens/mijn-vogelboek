@@ -1,178 +1,172 @@
-// Mijn Vogelboek — exacte stickerkoppeling v7 (2026-11-13).
-// Bron: https://github.com/alchaincyf/huashu-bird-sticker (CC BY 4.0).
-// Geen vervangende soorten. Gebruik de bestandsnaam uit de officiële index als bron.
+// Mijn Vogelboek — stickers v8.
+// Gebruik uitsluitend echte bestandslocaties uit de Huashu/AviList-index.
+// Voor 91 eerder zelfstandige soorten bevat species.json extra 'forms'-stickers.
+// Geen substituten: zonder aantoonbare match tonen we het bestaande silhouet.
 const CDN = 'https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/';
 const INDEX_URL = CDN + 'data/stickers.json';
-const byName = new Map();
-let indexPromise;
+const SPECIES_URL = CDN + 'data/species.json';
+const byScientific = new Map();
+const formByOldName = new Map();
+let loading = null;
+let formsLoading = null;
 
-function norm(x) {
-  return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[_\-’']/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+function norm(s) {
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[_\-’']/g,' ').replace(/\s+/g,' ').trim().toLowerCase();
 }
-function filenameKey(path) {
-  return norm(String(path).split('/').pop().replace(/\.(?:webp|png|jpe?g)$/i, ''));
+function validFile(file) {
+  if(typeof file !== 'string') return null;
+  const f = file.replace(/^\/+/, '');
+  if (!/^stickers\/[\w-]+\/[\w-]+\/[\w.\-]+\.(?:webp|png)$/i.test(f)) return null;
+  return f;
 }
-function safeStickerPath(path) {
-  if (typeof path !== 'string') return null;
-  const p = path.replace(/^\/+/, '');
-  return /^stickers\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(webp|png)$/i.test(p) ? p : null;
+function keyFromFile(file) {
+  return norm(file.split('/').pop().replace(/\.(webp|png)$/i,''));
 }
-const exactSpecies = {
-  'amerikaanse wintertaling': { scientific: 'Anas carolinensis', file: 'stickers/Anseriformes/Anatidae/Anas_carolinensis.webp' },
-  'woudaap': { scientific: 'Ixobrychus minutus', file: 'stickers/Pelecaniformes/Ardeidae/Ixobrychus_minutus.webp' },
-  'koereiger': { scientific: 'Bubulcus ibis', file: 'stickers/Pelecaniformes/Ardeidae/Bubulcus_ibis.webp' },
-  'humes braamsluiper': { scientific: 'Curruca althaea', file: 'stickers/Passeriformes/Sylviidae/Curruca_althaea.webp' },
-  'bonte kraai': { scientific: 'Corvus cornix', file: 'stickers/Passeriformes/Corvidae/Corvus_cornix.webp' },
-  'amerikaanse grote stern': { scientific: 'Thalasseus acuflavidus', file: 'stickers/Charadriiformes/Laridae/Thalasseus_acuflavidus.webp' },
-  'witstuitbarmsijs': { scientific: 'Acanthis hornemanni', file: 'stickers/Passeriformes/Fringillidae/Acanthis_hornemanni.webp' },
-  'maskergors': { scientific: 'Emberiza personata', file: 'stickers/Passeriformes/Emberizidae/Emberiza_personata.webp' },
-  'wilgengors': { scientific: 'Emberiza aureola', file: 'stickers/Passeriformes/Emberizidae/Emberiza_aureola.webp' },
-  'rietgors': { scientific: 'Emberiza schoeniclus', file: 'stickers/Passeriformes/Emberizidae/Emberiza_schoeniclus.webp' },
+function knownName(name) {
+  // Verifieerbare AviList 2026 wijzigingen (zelfde vogel, andere genusnaam).
+  const rename = {
+    'emberiza schoeniclus':'Schoeniclus schoeniclus',
+    'emberiza aureola':'Schoeniclus aureolus',
+    'emberiza personata':'Schoeniclus personatus',
+    'emberiza pusilla':'Schoeniclus pusillus',
+    'emberiza chrysophrys':'Schoeniclus chrysophrys',
+    'emberiza rustica':'Schoeniclus rusticus',
+    'emberiza melanocephala':'Melophus melanocephalus',
+    'emberiza bruniceps':'Melophus bruniceps',
+    'emberiza spodocephala':'Schoeniclus spodocephalus',
+    'ixobrychus minutus':'Botaurus minutus',
+    'bubulcus ibis':'Ardea ibis',
+    'sylvia curruca':'Curruca curruca',
+    'sylvia althaea':'Curruca althaea',
+    'accipiter gentilis':'Astur gentilis',
+    'dendrocopos medius':'Dendrocoptes medius'
+  };
+  return rename[norm(name)] || '';
+}
+const targetNames = {
+  'amerikaanse wintertaling': 'Anas carolinensis',
+  'woudaap': 'Ixobrychus minutus',
+  'koereiger': 'Bubulcus ibis',
+  'humes braamsluiper': 'Curruca althaea',
+  'bonte kraai': 'Corvus cornix',
+  'amerikaanse grote stern': 'Thalasseus acuflavidus',
+  'witstuitbarmsijs': 'Acanthis hornemanni',
+  'maskergors': 'Emberiza personata',
+  'wilgengors': 'Emberiza aureola',
+  'rietgors': 'Emberiza schoeniclus',
+  'bruinkopgors': 'Emberiza bruniceps',
+  'zwartkopgors': 'Emberiza melanocephala',
+  'geelbrauwgors': 'Emberiza chrysophrys',
+  'dwerggors': 'Emberiza pusilla',
+  'bosgors': 'Emberiza rustica'
 };
 
-// Old genera are considered only where they refer to the same species;
-// never silently map one species to a different species.
-const dutchAliases = {
-    'kleine zwaan': ['Cygnus bewickii','Cygnus columbianus'],
-    'witbuikrotgans': ['Branta bernicla','Branta hrota','Branta bernicla hrota'],
-    'zwarte rotgans': ['Branta bernicla','Branta nigricans','Branta bernicla nigricans'],
-    'korhoen': ['Lyrurus tetrix','Tetrao tetrix'],
-    'amerikaanse wintertaling': ['Anas carolinensis','Anas crecca carolinensis'],
-    'horusgierzwaluw': ['Apus horus'],
-    'vale pijlstormvogel': ['Calonectris borealis','Calonectris diomedea'],
-    'woudaap': ['Ixobrychus minutus','Ardeola minuta'],
-    'koereiger': ['Bubulcus ibis','Ardea ibis'],
-    'dwergaalscholver': ['Microcarbo pygmaeus','Phalacrocorax pygmeus'],
-    'kuifaalscholver': ['Gulosus aristotelis','Phalacrocorax aristotelis'],
-    'morinelplevier': ['Charadrius morinellus','Eudromias morinellus'],
-    'kleine plevier': ['Charadrius dubius'],
-    'strandplevier': ['Anarhynchus alexandrinus','Charadrius alexandrinus'],
-    'taiga strandloper': ['Calidris subminuta'],
-    'taigastrandloper': ['Calidris subminuta'],
-    'bairds strandloper': ['Calidris bairdii'],
-    'grauwe franjepoot': ['Phalaropus lobatus'],
-    'zwarte zeekoet': ['Cepphus grylle'],
-    'lachmeeuw': ['Leucophaeus atricilla','Larus atricilla'],
-    'franklins meeuw': ['Leucophaeus pipixcan','Larus pipixcan'],
-    'zwartkop meeuw': ['Ichthyaetus melanocephalus','Larus melanocephalus'],
-    'audoinsmeeuw': ['Ichthyaetus audouinii','Larus audouinii'],
-    "audouinsmeeuw": ['Ichthyaetus audouinii','Larus audouinii'],
-    'thayers meeuw': ['Larus thayeri','Larus glaucoides'],
-    'sierlijke stern': ['Onychoprion anaethetus','Sterna anaethetus'],
-    'grote stern': ['Thalasseus sandvicensis','Sterna sandvicensis'],
-    'amerikaanse grote stern': ['Thalasseus acuflavidus','Sterna acuflavida','Sterna acuflavida acuflavida'],
-    'dwergarend': ['Hieraaetus pennatus','Aquila pennata'],
-    'havik': ['Astur gentilis','Accipiter gentilis'],
-    'steenuil': ['Athene noctua'],
-    'grijskopspecht': ['Picus canus'],
-    'middelste bonte specht': ['Dendrocoptes medius','Dendrocopos medius'],
-    'steppeklapekster': ['Lanius pallidirostris','Lanius excubitor'],
-    'notenkraker': ['Nucifraga caryocatactes'],
-    'kauw': ['Coloeus monedula','Corvus monedula'],
-    'daurische kauw': ['Coloeus dauuricus','Corvus dauuricus'],
-    'bonte kraai': ['Corvus cornix','Corvus corone cornix'],
-    'strandleeuwerik': ['Eremophila alpestris'],
-    'groene fitis': ['Phylloscopus trochiloides'],
-    'bruine boszanger': ['Phylloscopus fuscatus'],
-    'balkan bergfluiter': ['Phylloscopus orientalis'],
-    'balkanbergfluiter': ['Phylloscopus orientalis'],
-    'siberische tjiftjaf': ['Phylloscopus tristis','Phylloscopus collybita'],
-    'humes braamsluiper': ['Curruca althaea','Sylvia althaea','Curruca curruca althaea'],
-    'braamsluiper': ['Curruca curruca','Sylvia curruca'],
-    'kleine zwartkop': ['Curruca melanocephala','Sylvia melanocephala'],
-    'provencaalse grasmus': ['Curruca undata','Sylvia undata'],
-    'provençaalse grasmus': ['Curruca undata','Sylvia undata'],
-    'siberische sprinkhaanzanger': ['Helopsaltes certhiola','Locustella certhiola'],
-    'stejnegers roodborsttapuit': ['Saxicola stejnegeri','Saxicola maurus'],
-    'noordse kwikstaart': ['Motacilla thunbergi','Motacilla flava'],
-    'witkeelkwikstaart': ['Motacilla cinereocapilla','Motacilla flava'],
-    'engelse kwikstaart': ['Motacilla flavissima','Motacilla flava'],
-    'rouwkwikstaart': ['Motacilla yarrellii','Motacilla alba'],
-    'balkankwikstaart': ['Motacilla feldegg','Motacilla flava'],
-    'oeverpieper': ['Anthus petrosus'],
-    'atlasvink': ['Fringilla spodiogenys'],
-    'roodmus': ['Carpodacus erythrinus'],
-    'kleine barmsijs': ['Acanthis cabaret','Carduelis cabaret','Acanthis flammea cabaret','Carduelis flammea cabaret'],
-    'witstuitbarmsijs': ['Acanthis hornemanni','Carduelis hornemanni','Acanthis flammea hornemanni','Acanthis exilipes','Carduelis hornemanni exilipes'],
-    'bruinkopgors': ['Emberiza bruniceps','Emberiza bruniceps bruniceps'],
-    'zwartkopgors': ['Emberiza melanocephala','Emberiza melanocephala melanocephala'],
-    'wartkopgors': ['Emberiza melanocephala'],
-    'bruinkeelortolaan': ['Emberiza caesia'],
-    'cirlgors': ['Emberiza cirlus'],
-    'rietgors': ['Emberiza schoeniclus'],
-    'wilgengors': ['Emberiza aureola','Emberiza aureola aureola'],
-    'geelbrauwgors': ['Emberiza chrysophrys','Emberiza chrysophrys chrysophrys'],
-    'dwerggors': ['Emberiza pusilla','Emberiza pusilla pusilla'],
-    'bosgors': ['Emberiza rustica','Emberiza rustica rustica'],
-    'maskergors': ['Emberiza personata','Emberiza spodocephala personata'],
-    'kleinste canadese gans': ['Branta hutchinsii'],
-    'heilige ibis': ['Threskiornis aethiopicus'],
-    'bruinkopdiksnavelmees': ['Paradoxornis webbianus','Suthora webbiana']
+// Waar AviList soorten samenvoegt is er soms een eigen 'form'-sticker.
+// Deze toewijzingen noemen de exacte oude soort en de AviList-ondersoort;
+// er wordt pas iets getoond als de form daadwerkelijk in species.json staat.
+const formNames = {
+  'anas carolinensis': {parent:'Anas crecca', suffix:'carolinensis'},
+  'corvus cornix': {parent:'Corvus corone', suffix:'cornix'},
+  'thalasseus acuflavidus': {parent:'Thalasseus sandvicensis', suffix:'acuflavidus'},
+  'acanthis hornemanni': {parent:'Acanthis flammea', suffix:'hornemanni'},
+  'curruca althaea': {parent:'Curruca curruca', suffix:'althaea'}
 };
 
-const scientificAliases = {
-  'accipiter gentilis':['Astur gentilis'],
-  'corvus monedula':['Coloeus monedula'],
-  'dendrocopos medius':['Dendrocoptes medius'],
-  'sylvia curruca':['Curruca curruca'],
-  'sylvia undata':['Curruca undata'],
-  'sylvia althaea':['Curruca althaea'],
-  'sterna sandvicensis':['Thalasseus sandvicensis'],
-  'sterna acuflavida':['Thalasseus acuflavidus'],
-  'larus melanocephalus':['Ichthyaetus melanocephalus'],
-  'larus audouinii':['Ichthyaetus audouinii'],
-  'charadrius alexandrinus':['Anarhynchus alexandrinus'],
-  'aquila pennata':['Hieraaetus pennatus']
-};
-
-export async function loadStickerIndex() {
-  if (indexPromise) return indexPromise;
-  indexPromise = (async () => {
-    const response = await fetch(INDEX_URL);
-    if (!response.ok) throw new Error('Stickerindex: HTTP ' + response.status);
-    const index = await response.json();
-    if (!Array.isArray(index.stickers)) throw new Error('Stickerindex: onverwacht formaat');
-    const base = typeof index.cdn === 'string' && /^https:\/\//.test(index.cdn)
-      ? index.cdn.replace(/\/?$/, '/') : CDN;
-    let valid = 0;
-    for (const r of index.stickers) {
-      // Crucial fix: a record's `scientific` field is optional;
-      // we ALWAYS index the exact filename, even if metadata names are absent.
-      const path = safeStickerPath(r.file);
-      if (!path) continue;
-      const url = base + path;
-      byName.set(filenameKey(path), url);
-      for (const name of [r.scientific, r.scientificName, r.sci, r.id]) {
-        if (name && !byName.has(norm(name))) byName.set(norm(name), url);
+export async function loadStickerIndex(){
+  if(loading) return loading;
+  loading=(async()=>{
+    const r=await fetch(INDEX_URL);
+    if(!r.ok) throw Error('Stickerindex HTTP '+r.status);
+    const index=await r.json();
+    if(!Array.isArray(index.stickers)) throw Error('Onbekend stickerindex-formaat');
+    const base=typeof index.cdn==='string'&&index.cdn.startsWith('https://')?index.cdn:CDN;
+    const prefix=base.endsWith('/')?base:base+'/';
+    for(const s of index.stickers){
+      const path=validFile(s.file);
+      if(!path)continue;
+      const url=prefix+path;
+      byScientific.set(keyFromFile(path),url);
+      for(const name of [s.scientific,s.scientificName,s.sci,s.id]){
+        if(name&&!byScientific.has(norm(name)))byScientific.set(norm(name),url);
       }
-      valid++;
     }
-    console.info('Mijn Vogelboek: ' + valid + ' stickerbestanden ingelezen.');
-    // Log independently whether the requested names exist in the current index.
-    for (const [nl, spec] of Object.entries(exactSpecies)) {
-      console.info('[sticker-check]', nl, byName.has(norm(spec.scientific)) ? 'in index' : 'exact pad als extra optie');
+    console.info('Mijn Vogelboek: '+index.stickers.length+' soortstickers ingelezen.');
+    // Forms worden alleen apart opgehaald indien een van de doelsoorten ontbreekt.
+    const needsForms=Object.values(formNames).some((_,i)=>{
+      const old=Object.keys(formNames)[i];
+      return !byScientific.has(old);
+    });
+    if(needsForms){
+      loadForms().then(()=>window.dispatchEvent(new Event('vogelboek-stickers-updated')))
+        .catch(err=>console.warn('Form-stickers konden niet laden:',err));
     }
-    return valid;
+    return byScientific.size;
   })();
-  try { return await indexPromise; }
-  catch (e) { indexPromise = null; throw e; }
+  try{return await loading}catch(err){loading=null;throw err}
 }
 
-export function stickerMatch(scientific, dutchName = '') {
-  const nl = norm(dutchName), exact = exactSpecies[nl];
-  if (exact) {
-    // Look up actual filename in index; only use the named species.
-    const url = byName.get(norm(exact.scientific)) || CDN + exact.file;
-    return {url, kind:'exact', scientific: exact.scientific, label:dutchName};
+async function loadForms(){
+  if(formsLoading)return formsLoading;
+  formsLoading=(async()=>{
+    const r=await fetch(SPECIES_URL);
+    if(!r.ok)throw Error('Soortendata HTTP '+r.status);
+    const raw=await r.json();
+    const all=Array.isArray(raw)?raw:(raw.species||[]);
+    const base=CDN;
+    let count=0;
+    for(const s of all){
+      if(!Array.isArray(s.forms))continue;
+      const parent=norm(s.scientificName);
+      for(const form of s.forms){
+        const f=validFile(form?.sticker?.file||form?.file);
+        if(!f)continue;
+        const names=[form.scientificName,form.formerScientificName,form.iocScientificName,form.id,form.previous?.id,form.previous?.scientificName];
+        for(const n of names){if(n){formByOldName.set(norm(n),base+f)}}
+        // For a form named Genus_species.subspecies.webp, identify the actual
+        // bird by *both* the parent species and the suffix (not suffix alone).
+        const filename=f.split('/').pop();
+        const match=filename.match(/^([A-Za-z]+_[a-z]+)\.([a-z]+)\.(webp|png)$/i);
+        if(match){
+          const suffix=match[2].toLowerCase();
+          for(const [old, spec] of Object.entries(formNames)){
+            if(parent===norm(spec.parent)&&suffix===spec.suffix){
+              formByOldName.set(old,base+f);
+            }
+          }
+        }
+        count++;
+      }
+    }
+    console.info('Mijn Vogelboek: '+count+' aanvullende vormstickers doorzocht.');
+    for(const [old] of Object.entries(formNames)) {
+      console.info('[sticker-check]',old, formByOldName.has(old)?'vormsticker gevonden':'geen exacte vormsticker gevonden');
+    }
+    return count;
+  })();
+  return formsLoading;
+}
+
+export function stickerMatch(scientific, dutchName=''){
+  const candidateNames=[];
+  const add=n=>{if(n&&!candidateNames.some(x=>norm(x)===norm(n)))candidateNames.push(n)};
+  const original=scientific||'';
+  const selected=targetNames[norm(dutchName)];
+  add(selected);
+  add(original);
+  if(selected)add(knownName(selected));
+  add(knownName(original));
+  for(const name of candidateNames){
+    const url=byScientific.get(norm(name));
+    if(url)return {url,kind:'exact',scientific:name,label:dutchName};
   }
-  const candidates = [scientific, ...(scientificAliases[norm(scientific)] || []), ...(dutchAliases[nl] || [])];
-  for (const name of candidates) {
-    const url = byName.get(norm(name));
-    if (url) return {url,kind:'exact',scientific:name,label:dutchName};
+  // Alleen de door de maker zelf opgenomen vormafbeelding, geen andere soort.
+  for(const name of candidateNames){
+    const url=formByOldName.get(norm(name));
+    if(url)return {url,kind:'exact-form',scientific:name,label:dutchName};
   }
   return null;
 }
-export function stickerFor(scientific,dutchName='') {
-  return stickerMatch(scientific,dutchName)?.url || '';
+export function stickerFor(scientific,dutchName=''){
+  return stickerMatch(scientific,dutchName)?.url||'';
 }

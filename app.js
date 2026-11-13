@@ -1,6 +1,6 @@
 import {KLEUREN, KLEUR_HEX, kleurenVoor, ingedeeldAantal} from './kleuren.js?v=1';
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerMatch} from './stickers.js?v=7';
+import {loadStickerIndex, stickerMatch} from './stickers.js?v=8';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -330,3 +330,5 @@ document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.pr
 initCloud();
 // Stickers zijn decoratief: een netwerkfout mag het vogelboek nooit blokkeren.
 loadStickerIndex().then(()=>render()).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));
+
+window.addEventListener('vogelboek-stickers-updated', () => render());
