@@ -1,5 +1,5 @@
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerFor} from './stickers.js?v=3';
+import {loadStickerIndex, stickerMatch} from './stickers.js?v=4';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -170,16 +170,23 @@ async function loadPhotos(){
 }
 
 function birdSticker(s, size=52, cls=''){
-    const url=stickerFor(s.scientific, s.name);
-    if(!url)return groupIcon(s.group,size);
-    return `<img class="bird-sticker ${cls}" src="${esc(url)}" alt="AI-sticker van ${esc(s.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
+    const match=stickerMatch(s.scientific, s.name);
+    if(!match)return groupIcon(s.group,size);
+    const explanation=match.kind==='similar'
+        ? `Vergelijkbare soort: ${match.label} (niet ${s.name})`
+        : `AI-sticker van ${s.name}`;
+    return `<img class="bird-sticker ${cls}" src="${esc(match.url)}" alt="${esc(explanation)}" title="${esc(explanation)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
       `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
 }
 
+function similarLabel(s){
+    const match=stickerMatch(s.scientific,s.name);
+    return match?.kind==='similar' ? `<span class="similar-sticker-note" title="Deze AI-sticker toont ${esc(match.label)}, niet ${esc(s.name)}">≈ ${esc(match.label)}</span>` : '';
+}
 function stickerBadge(s, size=54, extra=''){
     return `<div class="sticker-badge ${extra}">${birdSticker(s,size,'badge-img')}</div>`;
 }
-function cardStickerOverlay(s, size=128){
+function cardStickerOverlay(s, size=68){
     return `<div class="card-sticker-overlay">${birdSticker(s,size,'card-sticker-img')}</div>`;
 }
 
@@ -236,7 +243,7 @@ function card(s){
         ? `<img src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy">`
         : `<div class="sticker-stage">${birdSticker(s,82,'hero-sticker')}</div>`;
 
-    return `<div class="bird-card ${src?'with-photo-sticker':''}"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-card-sticker':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}</div></div>${src?cardStickerOverlay(s,124):''}${bottomBtns}</div>`;
+    return `<div class="bird-card ${src?'with-photo-sticker':''}"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-card-sticker':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}${similarLabel(s)}</div></div>${src?cardStickerOverlay(s,68):''}${bottomBtns}</div>`;
 }
 
 function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}">${stickerBadge(s,44,'stamp-badge')}<div class="stamp-name">${esc(s.name)}</div></div></div>`}
@@ -289,7 +296,7 @@ function modalHtml(){
     const s=species.find(x=>x.id===modal);
     if(!s)return '';
     const e=entries[s.id]||{}, src=e.photo||photoCache[s.id];
-    const stickerPanel = `<div class="modal-sticker">${birdSticker(s,110)}<span>Illustratie (AI) · Huashu Bird Sticker</span></div>`;
+    const stickerPanel = `<div class="modal-sticker">${birdSticker(s,110)}<span>Illustratie (AI) · Huashu Bird Sticker ${similarLabel(s)}</span></div>`;
     const hwText = e.date || e.location ? `<span class="handwritten" style="font-size:22px; margin-top:5px; padding-left:4px">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
     
     if(!canEdit){

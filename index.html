@@ -74,14 +74,20 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 @media (max-width: 950px) { .photo-collage { column-count: 2; } }
 @media (max-width: 550px) { .photo-collage { column-count: 2; column-gap: 12px; } .stamp-wrapper { margin-bottom: 12px; } .stamp-card { padding: 10px; padding-bottom: 36px; } .stamp-name { height: 36px; font-size: 12.5px; } }
 /* Soortspecifieke AI-stickers */
+@keyframes stickerHop{0%,100%{transform:translateY(0) rotate(0deg)}38%{transform:translateY(-10px) rotate(-4deg)}70%{transform:translateY(-3px) rotate(3deg)}}
+.bird-card:hover .card-sticker-img,.bird-card:hover .hero-sticker,.rowitem:hover .bird-sticker{animation:stickerHop .58s ease-in-out}
+.bird-card:hover .card-sticker-overlay{overflow:visible}
+@media(prefers-reduced-motion:reduce){.bird-card:hover .card-sticker-img,.bird-card:hover .hero-sticker,.rowitem:hover .bird-sticker{animation:none}}
+.similar-sticker-note{display:block;font-size:10px;color:#995c35;line-height:1.25;margin-top:5px}
+
 .sticker-stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:6px 10px;background:#f5e1e8}
 .bird-top.has-sticker .bird-sticker{width:100%;height:100%;object-fit:contain}
 .bird-top.has-sticker .sticker-fallback{width:100%;height:100%}
 .bird-top.has-own-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.card-sticker-overlay{position:absolute;right:24px;top:148px;width:142px;height:142px;z-index:3;pointer-events:none}
+.card-sticker-overlay{position:absolute;right:24px;top:148px;width:71px;height:71px;z-index:3;pointer-events:none}
 .card-sticker-overlay .bird-sticker{width:100%;height:100%;object-fit:contain;background:transparent;padding:0;filter:drop-shadow(0 8px 12px rgba(0,0,0,0.12))}
 .card-sticker-overlay .sticker-fallback{width:100%;height:100%}
-.bird-info-with-card-sticker{padding-right:165px;min-height:138px}
+.bird-info-with-card-sticker{padding-right:16px;min-height:0}
 .sticker-badge{position:absolute;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none}
 .sticker-badge .bird-sticker{width:100%;height:100%;object-fit:contain;background:transparent;padding:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,0.12))}
 .sticker-badge .sticker-fallback{width:100%;height:100%}
@@ -93,10 +99,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 .modal-photo-wrap{position:relative;margin-top:10px}
 .modal-photo-badge{left:16px;bottom:14px;width:72px;height:72px;transform:rotate(-6deg)}
 .stamp-card{position:relative}
-.stamp-badge{left:auto;right:10px;bottom:40px;width:54px;height:54px;transform:rotate(8deg)}
+.stamp-badge{left:auto;right:10px;bottom:40px;width:54px;height:54px;transform:rotate(8deg);background:rgba(255,255,255,.96);border:1px solid rgba(194,89,119,.16);border-radius:14px;padding:4px;box-shadow:0 5px 16px #0002}
 .sticker-credit{font-size:12px;color:#8f747d;margin:18px 0 0;line-height:1.6}
-@media(max-width:700px){.card-sticker-overlay{width:126px;height:126px;right:18px;top:150px}.bird-info-with-card-sticker{padding-right:145px;min-height:128px}}
-@media(max-width:550px){.card-sticker-overlay{width:104px;height:104px;right:14px;top:140px}.bird-info-with-card-sticker{padding-right:108px;min-height:110px}.modal-photo-badge{width:64px;height:64px;left:10px;bottom:8px}}
+@media(max-width:700px){.card-sticker-overlay{width:63px;height:63px;right:18px;top:150px}.bird-info-with-card-sticker{padding-right:16px;min-height:0}}
+@media(max-width:550px){.card-sticker-overlay{width:52px;height:52px;right:14px;top:140px}.bird-info-with-card-sticker{padding-right:11px;min-height:0}.modal-photo-badge{width:64px;height:64px;left:10px;bottom:8px}}
 </style>
 </head>
 <body>
@@ -109,7 +115,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=25"></script>
+<script type="module" src="./app.js?v=26"></script>
 
 <!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
