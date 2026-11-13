@@ -1,6 +1,6 @@
 import {KLEUREN, KLEUR_HEX, kleurenVoor, ingedeeldAantal} from './kleuren.js?v=1';
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerMatch} from './stickers.js?v=5';
+import {loadStickerIndex, stickerMatch} from './stickers.js?v=7';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -177,7 +177,7 @@ function birdSticker(s, size=52, cls=''){
     const explanation=match.kind==='similar'
         ? `Vergelijkbare soort: ${match.label} (niet ${s.name})`
         : `AI-sticker van ${s.name}`;
-    return `<img class="bird-sticker ${cls}" src="${esc(match.url)}" alt="${esc(explanation)}" title="${esc(explanation)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
+    return `<img class="bird-sticker ${cls}" src="${esc(match.url)}" alt="${esc(explanation)}" title="${esc(explanation)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="console.warn('Sticker niet bereikbaar:',this.src);this.style.display='none';this.nextElementSibling.style.display='flex'">`+
       `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
 }
 

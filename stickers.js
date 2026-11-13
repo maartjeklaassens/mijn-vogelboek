@@ -1,24 +1,38 @@
-// Sticker index: https://github.com/alchaincyf/huashu-bird-sticker
-// AI-illustraties CC BY 4.0; indexdata MIT.
-// We zoeken primair op wetenschappelijke naam, maar vangen ook taxonomische
-// naamswijzigingen en een aantal Nederlandse namen/subsoorten op.
-const INDEX_URL = 'https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/data/stickers.json';
-const CDN_BASE = 'https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/';
-const stickerMap = new Map();
-let loading = null;
+// Mijn Vogelboek — exacte stickerkoppeling v7 (2026-11-13).
+// Bron: https://github.com/alchaincyf/huashu-bird-sticker (CC BY 4.0).
+// Geen vervangende soorten. Gebruik de bestandsnaam uit de officiële index als bron.
+const CDN = 'https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/';
+const INDEX_URL = CDN + 'data/stickers.json';
+const byName = new Map();
+let indexPromise;
 
-function normalize(name){
-    return String(name ?? '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g,'')
-        .trim()
-        .replace(/[_’'`-]/g,' ')
-        .replace(/\s+/g,' ')
-        .toLowerCase();
+function norm(x) {
+  return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_\-’']/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
 }
+function filenameKey(path) {
+  return norm(String(path).split('/').pop().replace(/\.(?:webp|png|jpe?g)$/i, ''));
+}
+function safeStickerPath(path) {
+  if (typeof path !== 'string') return null;
+  const p = path.replace(/^\/+/, '');
+  return /^stickers\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(webp|png)$/i.test(p) ? p : null;
+}
+const exactSpecies = {
+  'amerikaanse wintertaling': { scientific: 'Anas carolinensis', file: 'stickers/Anseriformes/Anatidae/Anas_carolinensis.webp' },
+  'woudaap': { scientific: 'Ixobrychus minutus', file: 'stickers/Pelecaniformes/Ardeidae/Ixobrychus_minutus.webp' },
+  'koereiger': { scientific: 'Bubulcus ibis', file: 'stickers/Pelecaniformes/Ardeidae/Bubulcus_ibis.webp' },
+  'humes braamsluiper': { scientific: 'Curruca althaea', file: 'stickers/Passeriformes/Sylviidae/Curruca_althaea.webp' },
+  'bonte kraai': { scientific: 'Corvus cornix', file: 'stickers/Passeriformes/Corvidae/Corvus_cornix.webp' },
+  'amerikaanse grote stern': { scientific: 'Thalasseus acuflavidus', file: 'stickers/Charadriiformes/Laridae/Thalasseus_acuflavidus.webp' },
+  'witstuitbarmsijs': { scientific: 'Acanthis hornemanni', file: 'stickers/Passeriformes/Fringillidae/Acanthis_hornemanni.webp' },
+  'maskergors': { scientific: 'Emberiza personata', file: 'stickers/Passeriformes/Emberizidae/Emberiza_personata.webp' },
+  'wilgengors': { scientific: 'Emberiza aureola', file: 'stickers/Passeriformes/Emberizidae/Emberiza_aureola.webp' },
+  'rietgors': { scientific: 'Emberiza schoeniclus', file: 'stickers/Passeriformes/Emberizidae/Emberiza_schoeniclus.webp' },
+};
 
-// Handmatige vangnetten voor soorten die in jouw Nederlandse lijst anders heten,
-// op ondersoortniveau staan of in AviList een andere wetenschappelijke naam hebben.
+// Old genera are considered only where they refer to the same species;
+// never silently map one species to a different species.
 const dutchAliases = {
     'kleine zwaan': ['Cygnus bewickii','Cygnus columbianus'],
     'witbuikrotgans': ['Branta bernicla','Branta hrota','Branta bernicla hrota'],
@@ -97,151 +111,68 @@ const dutchAliases = {
     'bruinkopdiksnavelmees': ['Paradoxornis webbianus','Suthora webbiana']
 };
 
-// Door gebruiker gecontroleerde namen. De bestandsnamen uit de repository
-// zijn doorgaans .webp; de volledige URL halen we uit data/stickers.json.
-const confirmedStickerNames = {
-    'amerikaanse wintertaling': 'Anas carolinensis',
-    'woudaap': 'Ixobrychus minutus',
-    'koereiger': 'Bubulcus ibis',
-    'humes braamsluiper': 'Curruca althaea',
-    'bonte kraai': 'Corvus cornix',
-    'amerikaanse grote stern': 'Thalasseus acuflavidus',
-    'witstuitbarmsijs': 'Acanthis hornemanni',
-    'maskergors': 'Emberiza personata',
-    'wilgengors': 'Emberiza aureola',
-    'rietgors': 'Emberiza schoeniclus'
-};
-
 const scientificAliases = {
-    'cygnus columbianus': ['Cygnus bewickii'],
-    'phalacrocorax pygmeus': ['Microcarbo pygmaeus'],
-    'phalacrocorax aristotelis': ['Gulosus aristotelis'],
-    'accipiter gentilis': ['Astur gentilis'],
-    'corvus monedula': ['Coloeus monedula'],
-    'corvus dauuricus': ['Coloeus dauuricus'],
-    'dendrocopos medius': ['Dendrocoptes medius'],
-    'larus melanocephalus': ['Ichthyaetus melanocephalus'],
-    'larus audouinii': ['Ichthyaetus audouinii'],
-    'sternula sandvicensis': ['Thalasseus sandvicensis'],
-    'ster na sandvicensis': ['Thalasseus sandvicensis'],
-    'ster na acuflavida': ['Thalasseus acuflavidus'],
-    'st erna sandvicensis': ['Thalasseus sandvicensis'],
-    'st erna acuflavida': ['Thalasseus acuflavidus'],
-    'sterna sandvicensis': ['Thalasseus sandvicensis'],
-    'sterna acuflavida': ['Thalasseus acuflavidus'],
-    'aquila pennata': ['Hieraaetus pennatus'],
-    'charadrius alexandrinus': ['Anarhynchus alexandrinus'],
-    'eudromias morinellus': ['Charadrius morinellus'],
-    'puffinus griseus': ['Ardenna grisea'],
-    'puffinus gravis': ['Ardenna gravis'],
-    'calonectris diomedea': ['Calonectris borealis'],
-    'sylvia curruca': ['Curruca curruca'],
-    'sylvia melanocephala': ['Curruca melanocephala'],
-    'sylvia undata': ['Curruca undata'],
-    'sylvia althaea': ['Curruca althaea'],
-    'saxicola maura': ['Saxicola maurus'],
-    'motacilla flava flavissima': ['Motacilla flavissima','Motacilla flava'],
-    'motacilla alba yarrellii': ['Motacilla yarrellii','Motacilla alba'],
-    'motacilla flava thunbergi': ['Motacilla thunbergi','Motacilla flava'],
-    'branta hrota': ['Branta bernicla'],
-    'branta nigricans': ['Branta bernicla'],
-    'anas crecca carolinensis': ['Anas carolinensis'],
-    'corvus corone cornix': ['Corvus cornix'],
-    'curruca curruca althaea': ['Curruca althaea','Sylvia althaea'],
-    'acanthis flammea cabaret': ['Acanthis cabaret'],
-    'carduelis flammea cabaret': ['Acanthis cabaret','Carduelis cabaret'],
-    'acanthis flammea hornemanni': ['Acanthis hornemanni'],
-    'acanthis exilipes': ['Acanthis hornemanni'],
-    'carduelis hornemanni exilipes': ['Acanthis hornemanni','Carduelis hornemanni'],
-    'emberiza spodocephala personata': ['Emberiza personata'],
-    'motacilla flava cinereocapilla': ['Motacilla cinereocapilla','Motacilla flava'],
-    'branta hutchinsii minima': ['Branta hutchinsii']
+  'accipiter gentilis':['Astur gentilis'],
+  'corvus monedula':['Coloeus monedula'],
+  'dendrocopos medius':['Dendrocoptes medius'],
+  'sylvia curruca':['Curruca curruca'],
+  'sylvia undata':['Curruca undata'],
+  'sylvia althaea':['Curruca althaea'],
+  'sterna sandvicensis':['Thalasseus sandvicensis'],
+  'sterna acuflavida':['Thalasseus acuflavidus'],
+  'larus melanocephalus':['Ichthyaetus melanocephalus'],
+  'larus audouinii':['Ichthyaetus audouinii'],
+  'charadrius alexandrinus':['Anarhynchus alexandrinus'],
+  'aquila pennata':['Hieraaetus pennatus']
 };
 
-// Geen vervangende soorten: als een identieke soort niet in de index kan worden
-// gevonden, blijft het bestaande groepssilhouet zichtbaar.
-
-function pushUnique(list, value){
-    if(!value) return;
-    const key = normalize(value);
-    if(key && !list.some(x => normalize(x) === key)) list.push(value);
-}
-
-function buildScientificCandidates(scientific = '', dutchName = ''){
-    const out = [];
-    const sci = String(scientific || '').trim();
-    const dutchKey = normalize(dutchName);
-    const sciKey = normalize(sci);
-
-    // Voor de expliciet bevestigde soorten nooit terugvallen op een andere soort.
-    if (confirmedStickerNames[dutchKey]) return [confirmedStickerNames[dutchKey]];
-    pushUnique(out, sci);
-
-    if(scientificAliases[sciKey]) {
-        for (const candidate of scientificAliases[sciKey]) pushUnique(out, candidate);
-    }
-
-    if (sci.startsWith('Sylvia ')) pushUnique(out, sci.replace(/^Sylvia\s+/,'Curruca '));
-    if (sci.startsWith('Curruca ')) pushUnique(out, sci.replace(/^Curruca\s+/,'Sylvia '));
-    if (sci.startsWith('Corvus monedula')) pushUnique(out, sci.replace(/^Corvus\s+/,'Coloeus '));
-    if (sci.startsWith('Corvus dauuricus')) pushUnique(out, sci.replace(/^Corvus\s+/,'Coloeus '));
-    if (sci.startsWith('Accipiter gentilis')) pushUnique(out, 'Astur gentilis');
-    if (sci.startsWith('Dendrocopos medius')) pushUnique(out, 'Dendrocoptes medius');
-    if (sci.startsWith('Phalacrocorax pygmeus')) pushUnique(out, 'Microcarbo pygmaeus');
-    if (sci.startsWith('Phalacrocorax aristotelis')) pushUnique(out, 'Gulosus aristotelis');
-    if (sci.startsWith('Sterna sandvicensis')) pushUnique(out, 'Thalasseus sandvicensis');
-    if (sci.startsWith('Sterna acuflavida')) pushUnique(out, 'Thalasseus acuflavidus');
-    if (sci.startsWith('Aquila pennata')) pushUnique(out, 'Hieraaetus pennatus');
-    if (sci.startsWith('Charadrius alexandrinus')) pushUnique(out, 'Anarhynchus alexandrinus');
-    if (sci.startsWith('Puffinus griseus')) pushUnique(out, 'Ardenna grisea');
-    if (sci.startsWith('Puffinus gravis')) pushUnique(out, 'Ardenna gravis');
-    if (sci.startsWith('Calonectris diomedea')) {
-        pushUnique(out, 'Calonectris borealis');
-        pushUnique(out, 'Calonectris diomedea');
-    }
-
-    if(dutchAliases[dutchKey]) {
-        for (const candidate of dutchAliases[dutchKey]) pushUnique(out, candidate);
-    }
-
-    return out;
-}
-
-export async function loadStickerIndex(){
-    if(loading) return loading;
-    loading = (async()=>{
-      const response = await fetch(INDEX_URL);
-      if(!response.ok) throw new Error('HTTP ' + response.status);
-      const index = await response.json();
-      if(!Array.isArray(index.stickers)) throw new Error('Stickerindex heeft onverwacht formaat');
-      const base = typeof index.cdn === 'string' && index.cdn.startsWith('https://cdn.jsdelivr.net/') ? index.cdn : CDN_BASE;
-      for(const record of index.stickers){
-        if(typeof record.file !== 'string' || !record.file.startsWith('stickers/') || record.file.includes('..')) continue;
-        const scientific = record.scientific || record.sci || record.scientificName || record.name || record.id;
-        if(!scientific) continue;
-        const key = normalize(scientific);
-        if(!stickerMap.has(key)) stickerMap.set(key, base + record.file);
-        // Extra exacte index op bestandsnaam (Genus_species.webp), juist omdat
-        // de metadata soms een andere taxonomische weergave gebruikt.
-        const basename = record.file.split('/').pop().replace(/\.(webp|png|jpg|jpeg)$/i, '');
-        const fileKey = normalize(basename);
-        if (!stickerMap.has(fileKey)) stickerMap.set(fileKey, base + record.file);
+export async function loadStickerIndex() {
+  if (indexPromise) return indexPromise;
+  indexPromise = (async () => {
+    const response = await fetch(INDEX_URL);
+    if (!response.ok) throw new Error('Stickerindex: HTTP ' + response.status);
+    const index = await response.json();
+    if (!Array.isArray(index.stickers)) throw new Error('Stickerindex: onverwacht formaat');
+    const base = typeof index.cdn === 'string' && /^https:\/\//.test(index.cdn)
+      ? index.cdn.replace(/\/?$/, '/') : CDN;
+    let valid = 0;
+    for (const r of index.stickers) {
+      // Crucial fix: a record's `scientific` field is optional;
+      // we ALWAYS index the exact filename, even if metadata names are absent.
+      const path = safeStickerPath(r.file);
+      if (!path) continue;
+      const url = base + path;
+      byName.set(filenameKey(path), url);
+      for (const name of [r.scientific, r.scientificName, r.sci, r.id]) {
+        if (name && !byName.has(norm(name))) byName.set(norm(name), url);
       }
-      console.info(`Vogelstickers: ${stickerMap.size} afbeeldingen geïndexeerd`);
-      return stickerMap.size;
-    })();
-    try { return await loading; }
-    catch(err) { loading = null; throw err; }
-}
-
-export function stickerMatch(scientific, dutchName = ''){
-    for(const candidate of buildScientificCandidates(scientific, dutchName)){
-        const url=stickerMap.get(normalize(candidate));
-        if(url) return {url,kind:'exact',label:dutchName,scientific:candidate};
+      valid++;
     }
-    return null;
+    console.info('Mijn Vogelboek: ' + valid + ' stickerbestanden ingelezen.');
+    // Log independently whether the requested names exist in the current index.
+    for (const [nl, spec] of Object.entries(exactSpecies)) {
+      console.info('[sticker-check]', nl, byName.has(norm(spec.scientific)) ? 'in index' : 'exact pad als extra optie');
+    }
+    return valid;
+  })();
+  try { return await indexPromise; }
+  catch (e) { indexPromise = null; throw e; }
 }
 
-export function stickerFor(scientific, dutchName = ''){
-    return stickerMatch(scientific,dutchName)?.url || '';
+export function stickerMatch(scientific, dutchName = '') {
+  const nl = norm(dutchName), exact = exactSpecies[nl];
+  if (exact) {
+    // Look up actual filename in index; only use the named species.
+    const url = byName.get(norm(exact.scientific)) || CDN + exact.file;
+    return {url, kind:'exact', scientific: exact.scientific, label:dutchName};
+  }
+  const candidates = [scientific, ...(scientificAliases[norm(scientific)] || []), ...(dutchAliases[nl] || [])];
+  for (const name of candidates) {
+    const url = byName.get(norm(name));
+    if (url) return {url,kind:'exact',scientific:name,label:dutchName};
+  }
+  return null;
+}
+export function stickerFor(scientific,dutchName='') {
+  return stickerMatch(scientific,dutchName)?.url || '';
 }
