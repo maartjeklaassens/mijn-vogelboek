@@ -1,6 +1,6 @@
 import {KLEUREN, KLEUR_HEX, kleurenVoor, ingedeeldAantal} from './kleuren.js?v=1';
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerMatch} from './stickers.js?v=9';
+import {loadStickerIndex, stickerMatch, stickerCandidates, stickerDiagnostics} from './stickers.js?v=10';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -172,12 +172,14 @@ async function loadPhotos(){
 }
 
 function birdSticker(s, size=52, cls=''){
-    const match=stickerMatch(s.scientific, s.name);
-    if(!match)return groupIcon(s.group,size);
-    const explanation=match.kind==='similar'
-        ? `Vergelijkbare soort: ${match.label} (niet ${s.name})`
-        : `AI-sticker van ${s.name}`;
-    return `<img class="bird-sticker ${cls}" src="${esc(match.url)}" data-backup="${esc(match.backupUrl)}" alt="${esc(explanation)}" title="${esc(explanation)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="if(!this.dataset.retried){this.dataset.retried='1';this.src=this.dataset.backup;}else{console.warn('Sticker niet bereikbaar via CDN of GitHub:',this.dataset.backup);this.style.display='none';this.nextElementSibling.style.display='flex';}">`+
+    const matches=stickerCandidates(s.scientific,s.name);
+    if(!matches.length)return groupIcon(s.group,size);
+    const urls=matches.map(x=>x.url);
+    // Elke afbeelding probeert achtereenvolgens het exacte indexpad via
+    // jsDelivr en via GitHub. Bij ondersoorten wordt eerst het vormbestand
+    // geprobeerd. Geen onjuiste lookalike-stickers.
+    const alt=`AI-sticker van ${s.name}`;
+    return `<img class="bird-sticker ${cls}" src="${esc(urls[0])}" data-sticker-urls="${esc(JSON.stringify(urls))}" data-sticker-index="0" data-sticker-name="${esc(s.name)}" alt="${esc(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`+
       `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
 }
 
@@ -329,6 +331,31 @@ document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.t
 document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}const savedSpeciesId=modal;modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) celebrateSeen(savedSpeciesId);}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
 initCloud();
 // Stickers zijn decoratief: een netwerkfout mag het vogelboek nooit blokkeren.
-loadStickerIndex().then(()=>render()).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));
+loadStickerIndex().then(()=>{const r=stickerDiagnostics(species);console.info('Stickerkandidaten:',r.candidates,'/',r.total,'; zonder match:',r.unresolved.length);render();}).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));
 
 window.addEventListener('vogelboek-stickers-updated', () => render());
+
+// Vervang een mislukte sticker-URL door de volgende geldige kandidaat.
+// Voorkomt dat een CDN-storing eerder werkende vogels laat verdwijnen.
+document.addEventListener('error', event => {
+  const img=event.target;
+  if(!(img instanceof HTMLImageElement)||!img.dataset.stickerUrls)return;
+  let urls;
+  try{urls=JSON.parse(img.dataset.stickerUrls)}catch{return;}
+  const next=Number(img.dataset.stickerIndex||0)+1;
+  if(next<urls.length){img.dataset.stickerIndex=String(next);img.src=urls[next];return;}
+  console.warn('Geen bereikbaar exact stickerbestand voor:',img.dataset.stickerName);
+  img.style.display='none';
+  if(img.nextElementSibling)img.nextElementSibling.style.display='flex';
+},true);
+
+// Diagnostiek kan zonder eigen waarnemingen/foto's worden gedownload.
+window.vogelboekStickerRapport=()=>{
+  const report=stickerDiagnostics(species);
+  const body=JSON.stringify(report,null,2);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([body],{type:'application/json'}));
+  a.download='vogelboek-stickercontrole.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  return report;
+};
