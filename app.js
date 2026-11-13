@@ -1,5 +1,5 @@
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerFor} from './stickers.js?v=2';
+import {loadStickerIndex, stickerFor} from './stickers.js?v=3';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -179,6 +179,9 @@ function birdSticker(s, size=52, cls=''){
 function stickerBadge(s, size=54, extra=''){
     return `<div class="sticker-badge ${extra}">${birdSticker(s,size,'badge-img')}</div>`;
 }
+function cardStickerOverlay(s, size=128){
+    return `<div class="card-sticker-overlay">${birdSticker(s,size,'card-sticker-img')}</div>`;
+}
 
 function countSeen(){return Object.keys(entries).filter(k=>entries[k]?.seen).length}
 function countPhoto(){return Object.values(entries).filter(x=>x.seen&&(x.photo||x.photoPath)).length}
@@ -230,10 +233,10 @@ function card(s){
         : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
 
     let topVisual = src
-        ? `<img src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy">${stickerBadge(s,52,'photo-badge')}`
+        ? `<img src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy">`
         : `<div class="sticker-stage">${birdSticker(s,82,'hero-sticker')}</div>`;
 
-    return `<div class="bird-card"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-badge':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}</div></div>${bottomBtns}</div>`;
+    return `<div class="bird-card ${src?'with-photo-sticker':''}"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-card-sticker':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}</div></div>${src?cardStickerOverlay(s,124):''}${bottomBtns}</div>`;
 }
 
 function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}">${stickerBadge(s,44,'stamp-badge')}<div class="stamp-name">${esc(s.name)}</div></div></div>`}
