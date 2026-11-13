@@ -1,5 +1,5 @@
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerFor} from './stickers.js?v=1';
+import {loadStickerIndex, stickerFor} from './stickers.js?v=2';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -170,10 +170,14 @@ async function loadPhotos(){
 }
 
 function birdSticker(s, size=52, cls=''){
-    const url=stickerFor(s.scientific);
+    const url=stickerFor(s.scientific, s.name);
     if(!url)return groupIcon(s.group,size);
     return `<img class="bird-sticker ${cls}" src="${esc(url)}" alt="AI-sticker van ${esc(s.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
       `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
+}
+
+function stickerBadge(s, size=54, extra=''){
+    return `<div class="sticker-badge ${extra}">${birdSticker(s,size,'badge-img')}</div>`;
 }
 
 function countSeen(){return Object.keys(entries).filter(k=>entries[k]?.seen).length}
@@ -224,14 +228,15 @@ function card(s){
     const bottomBtns = canEdit
         ? `<div class="bird-bottom"><button data-toggle="${esc(s.id)}">${e?.seen?'✓ Gezien':'＋ Gezien'}</button><button data-edit="${esc(s.id)}">Details →</button></div>`
         : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
-    
-    let topVisual = birdSticker(s,72);
-    if(src) topVisual+=`<img class="own-photo-corner" src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy" title="Jouw eigen foto">`;
 
-    return `<div class="bird-card"><div class="bird-top">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
+    let topVisual = src
+        ? `<img src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy">${stickerBadge(s,52,'photo-badge')}`
+        : `<div class="sticker-stage">${birdSticker(s,82,'hero-sticker')}</div>`;
+
+    return `<div class="bird-card"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-badge':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}</div></div>${bottomBtns}</div>`;
 }
 
-function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}"><div class="stamp-name">${esc(s.name)}</div></div></div>`}
+function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}">${stickerBadge(s,44,'stamp-badge')}<div class="stamp-name">${esc(s.name)}</div></div></div>`}
 
 function vogels(){
     let groups=[...new Set(species.map(s=>s.group))].sort();
