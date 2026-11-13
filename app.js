@@ -1,5 +1,5 @@
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerMatch} from './stickers.js?v=4';
+import {loadStickerIndex, stickerMatch} from './stickers.js?v=5';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -75,16 +75,17 @@ function getHeroTimeProps() {
     return {class:'', eye:'JOUW LEVENSLIJST', title:'Houd je waarnemingen bij', emoji:'🔭'};
 }
 
-function spawnFeathers() {
-    for(let i=0; i<6; i++){
-        let f = document.createElement('div');
-        f.className='feather';
-        f.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c25977" stroke-width="1.5"><path d="M12 2C8 6 6 10 6 15c0 3.3 2.7 6 6 6s6-2.7 6-6c0-5-2-9-6-13z"/><path d="M12 2v20M9 10l3 3M15 11l-3 3M10 16l2 2"/></svg>`;
-        f.style.left = (10 + Math.random()*80) + 'vw';
-        f.style.animationDuration = (2.5 + Math.random()*2) + 's';
-        f.style.animationDelay = (Math.random()*0.3) + 's';
-        document.body.appendChild(f);
-        setTimeout(()=>f.remove(), 4500);
+// Een korte pop-animatie op de sticker van de net aangevinkte soort.
+function celebrateSeen(id){
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const card=[...document.querySelectorAll('[data-species-card]')]
+        .find(el=>el.dataset.speciesCard===String(id));
+    if(card){
+        card.classList.remove('sticker-celebrate');
+        // Restart als de gebruiker snel opnieuw een vogel toevoegt.
+        void card.offsetWidth;
+        card.classList.add('sticker-celebrate');
+        card.addEventListener('animationend',()=>card.classList.remove('sticker-celebrate'),{once:true});
     }
 }
 
@@ -179,10 +180,6 @@ function birdSticker(s, size=52, cls=''){
       `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
 }
 
-function similarLabel(s){
-    const match=stickerMatch(s.scientific,s.name);
-    return match?.kind==='similar' ? `<span class="similar-sticker-note" title="Deze AI-sticker toont ${esc(match.label)}, niet ${esc(s.name)}">≈ ${esc(match.label)}</span>` : '';
-}
 function stickerBadge(s, size=54, extra=''){
     return `<div class="sticker-badge ${extra}">${birdSticker(s,size,'badge-img')}</div>`;
 }
@@ -243,7 +240,7 @@ function card(s){
         ? `<img src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy">`
         : `<div class="sticker-stage">${birdSticker(s,82,'hero-sticker')}</div>`;
 
-    return `<div class="bird-card ${src?'with-photo-sticker':''}"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-card-sticker':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}${similarLabel(s)}</div></div>${src?cardStickerOverlay(s,68):''}${bottomBtns}</div>`;
+    return `<div data-species-card="${esc(s.id)}" class="bird-card ${src?'with-photo-sticker':''}"><div class="bird-top ${src?'has-own-photo':'has-sticker'}">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info ${src?'bird-info-with-card-sticker':''}"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto + sticker':'sticker'}</div></div>${src?cardStickerOverlay(s,68):''}${bottomBtns}</div>`;
 }
 
 function stampCard(s){const e=entries[s.id],src=e?.photo||photoCache[s.id];return `<div class="stamp-wrapper" data-edit="${esc(s.id)}"><div class="stamp-card"><img src="${esc(src)}" alt="${esc(s.name)}">${stickerBadge(s,44,'stamp-badge')}<div class="stamp-name">${esc(s.name)}</div></div></div>`}
@@ -296,7 +293,7 @@ function modalHtml(){
     const s=species.find(x=>x.id===modal);
     if(!s)return '';
     const e=entries[s.id]||{}, src=e.photo||photoCache[s.id];
-    const stickerPanel = `<div class="modal-sticker">${birdSticker(s,110)}<span>Illustratie (AI) · Huashu Bird Sticker ${similarLabel(s)}</span></div>`;
+    const stickerPanel = `<div class="modal-sticker">${birdSticker(s,110)}<span>Illustratie (AI) · Huashu Bird Sticker </span></div>`;
     const hwText = e.date || e.location ? `<span class="handwritten" style="font-size:22px; margin-top:5px; padding-left:4px">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
     
     if(!canEdit){
@@ -305,7 +302,7 @@ function modalHtml(){
     return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div>${stickerPanel}<form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
 }
 
-function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><div class="logo">Mijn Vogelboek<small>Vogels verzamelen</small></div><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos()}
+function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><a class="logo" href="./" aria-label="Terug naar de startpagina van Mijn Vogelboek">Mijn Vogelboek<small>Vogels verzamelen</small></a><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos()}
 
 window.addEventListener('hashchange',()=>{
     const newPage=getHashPage();
@@ -317,10 +314,10 @@ window.addEventListener('hashchange',()=>{
     }
 });
 
-document.addEventListener('click',async ev=>{let t=ev.target.closest('[data-page],[data-edit],[data-toggle],#close,#delete,#logout,#export,#dismiss');if(!t)return;if(t.dataset.page){const target=t.dataset.page;if(location.hash==='#'+target){page=target;modal=null;render();window.scrollTo(0,0)}else{location.hash=target}}else if(t.dataset.edit){modal=t.dataset.edit;render()}else if(t.dataset.toggle){const id=t.dataset.toggle;try{let wasSeen = entries[id]?.seen; if(wasSeen){await removeEntry(id)}else{await persist(id,{seen:true,date:'',location:''}); spawnFeathers();}render()}catch(e){notify(e.message,'error')}}else if(t.id==='close'){modal=null;render()}else if(t.id==='dismiss'){message='';render()}else if(t.id==='delete'){if(!confirm('Wil je deze waarneming verwijderen?'))return;try{await removeEntry(modal);modal=null;render()}catch(e){notify(e.message,'error')}}else if(t.id==='logout'){await supabase.auth.signOut();session=null;canEdit=false;await fetchCloud();render()}else if(t.id==='export'){const payload=JSON.stringify({version:1,species,entries},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([payload],{type:'application/json'}));a.download='mijn-vogelboek-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}});
+document.addEventListener('click',async ev=>{let t=ev.target.closest('[data-page],[data-edit],[data-toggle],#close,#delete,#logout,#export,#dismiss');if(!t)return;if(t.dataset.page){const target=t.dataset.page;if(location.hash==='#'+target){page=target;modal=null;render();window.scrollTo(0,0)}else{location.hash=target}}else if(t.dataset.edit){modal=t.dataset.edit;render()}else if(t.dataset.toggle){const id=t.dataset.toggle;try{let wasSeen = entries[id]?.seen; if(wasSeen){await removeEntry(id)}else{await persist(id,{seen:true,date:'',location:''});}render();if(!wasSeen)celebrateSeen(id)}catch(e){notify(e.message,'error')}}else if(t.id==='close'){modal=null;render()}else if(t.id==='dismiss'){message='';render()}else if(t.id==='delete'){if(!confirm('Wil je deze waarneming verwijderen?'))return;try{await removeEntry(modal);modal=null;render()}catch(e){notify(e.message,'error')}}else if(t.id==='logout'){await supabase.auth.signOut();session=null;canEdit=false;await fetchCloud();render()}else if(t.id==='export'){const payload=JSON.stringify({version:1,species,entries},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([payload],{type:'application/json'}));a.download='mijn-vogelboek-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}});
 document.addEventListener('input',e=>{if(e.target.id==='search'){let pos=e.target.selectionStart;term=e.target.value;render();const el=$('#search');el.focus();el.setSelectionRange(pos,pos)}});
 document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.target.value;render()}else if(e.target.id==='rarity'){rarity=e.target.value;render()}else if(e.target.id==='filter'){filter=e.target.value;render()}else if(e.target.id==='sort'){sortBy=e.target.value;render()}else if(e.target.id==='seen'){$('#obsfields').style.opacity=e.target.checked?'1':'.45'}});
-document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) spawnFeathers();}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
+document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}const savedSpeciesId=modal;modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) celebrateSeen(savedSpeciesId);}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
 initCloud();
 // Stickers zijn decoratief: een netwerkfout mag het vogelboek nooit blokkeren.
 loadStickerIndex().then(()=>render()).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));

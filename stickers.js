@@ -97,6 +97,21 @@ const dutchAliases = {
     'bruinkopdiksnavelmees': ['Paradoxornis webbianus','Suthora webbiana']
 };
 
+// Door gebruiker gecontroleerde namen. De bestandsnamen uit de repository
+// zijn doorgaans .webp; de volledige URL halen we uit data/stickers.json.
+const confirmedStickerNames = {
+    'amerikaanse wintertaling': 'Anas carolinensis',
+    'woudaap': 'Ixobrychus minutus',
+    'koereiger': 'Bubulcus ibis',
+    'humes braamsluiper': 'Curruca althaea',
+    'bonte kraai': 'Corvus cornix',
+    'amerikaanse grote stern': 'Thalasseus acuflavidus',
+    'witstuitbarmsijs': 'Acanthis hornemanni',
+    'maskergors': 'Emberiza personata',
+    'wilgengors': 'Emberiza aureola',
+    'rietgors': 'Emberiza schoeniclus'
+};
+
 const scientificAliases = {
     'cygnus columbianus': ['Cygnus bewickii'],
     'phalacrocorax pygmeus': ['Microcarbo pygmaeus'],
@@ -143,27 +158,8 @@ const scientificAliases = {
     'branta hutchinsii minima': ['Branta hutchinsii']
 };
 
-// Alleen als er in de actuele AviList-index geen exacte match is, tonen we een
-// duidelijk herkenbaar alternatief. Deze zijn GEEN afbeeldingen van de genoemde soort.
-// De keus is een illustratieve vervanging, geen determinatieadvies.
-const similarSpecies = {
-    'amerikaanse wintertaling': {names:['Anas crecca'], label:'Wintertaling'},
-    'woudaap': {names:['Botaurus stellaris'], label:'Roerdomp'},
-    'koereiger': {names:['Egretta garzetta','Ardea alba'], label:'Kleine zilverreiger'},
-    'kleine plevier': {names:['Charadrius hiaticula'], label:'Bontbekplevier'},
-    'humes braamsluiper': {names:['Curruca curruca','Sylvia curruca'], label:'Braamsluiper'},
-    'bonte kraai': {names:['Corvus corone'], label:'Zwarte kraai'},
-    'amerikaanse grote stern': {names:['Thalasseus sandvicensis'], label:'Grote stern'},
-    'witstuitbarmsijs': {names:['Acanthis flammea','Acanthis cabaret'], label:'Grote barmsijs'},
-    'bruinkopgors': {names:['Emberiza melanocephala','Emberiza citrinella'], label:'Zwartkopgors'},
-    'zwartkopgors': {names:['Emberiza bruniceps','Emberiza citrinella'], label:'Bruinkopgors'},
-    'rietgors': {names:['Emberiza citrinella'], label:'Geelgors'},
-    'wilgengors': {names:['Emberiza citrinella'], label:'Geelgors'},
-    'geelbrauwgors': {names:['Emberiza citrinella'], label:'Geelgors'},
-    'dwerggors': {names:['Emberiza schoeniclus','Emberiza citrinella'], label:'Rietgors'},
-    'bosgors': {names:['Emberiza schoeniclus','Emberiza citrinella'], label:'Rietgors'},
-    'maskergors': {names:['Emberiza schoeniclus','Emberiza citrinella'], label:'Rietgors'}
-};
+// Geen vervangende soorten: als een identieke soort niet in de index kan worden
+// gevonden, blijft het bestaande groepssilhouet zichtbaar.
 
 function pushUnique(list, value){
     if(!value) return;
@@ -177,6 +173,8 @@ function buildScientificCandidates(scientific = '', dutchName = ''){
     const dutchKey = normalize(dutchName);
     const sciKey = normalize(sci);
 
+    // Voor de expliciet bevestigde soorten nooit terugvallen op een andere soort.
+    if (confirmedStickerNames[dutchKey]) return [confirmedStickerNames[dutchKey]];
     pushUnique(out, sci);
 
     if(scientificAliases[sciKey]) {
@@ -223,6 +221,11 @@ export async function loadStickerIndex(){
         if(!scientific) continue;
         const key = normalize(scientific);
         if(!stickerMap.has(key)) stickerMap.set(key, base + record.file);
+        // Extra exacte index op bestandsnaam (Genus_species.webp), juist omdat
+        // de metadata soms een andere taxonomische weergave gebruikt.
+        const basename = record.file.split('/').pop().replace(/\.(webp|png|jpg|jpeg)$/i, '');
+        const fileKey = normalize(basename);
+        if (!stickerMap.has(fileKey)) stickerMap.set(fileKey, base + record.file);
       }
       console.info(`Vogelstickers: ${stickerMap.size} afbeeldingen geïndexeerd`);
       return stickerMap.size;
@@ -232,25 +235,9 @@ export async function loadStickerIndex(){
 }
 
 export function stickerMatch(scientific, dutchName = ''){
-    // Exacte wetenschappelijke naam of bekende taxonomische naamswijziging.
     for(const candidate of buildScientificCandidates(scientific, dutchName)){
-        const url = stickerMap.get(normalize(candidate));
-        if(url) return {url,kind:'exact',label:dutchName, scientific:candidate};
-    }
-    // Pas nu een duidelijk benoemde, andere soort. Deze fallback wordt in het
-    // vogelkaartje en via de afbeeldingstitel expliciet vermeld.
-    const alt=similarSpecies[normalize(dutchName)];
-    if(alt){
-        for(const candidate of alt.names){
-            const url=stickerMap.get(normalize(candidate));
-            if(url){
-                // Sommige eerste keuzes kunnen ook ontbreken. Verwijs dan naar
-                // de werkelijke gebruikte wetenschappelijke naam, niet naar een
-                // onverifieerbare Nederlandse soortnaam.
-                const name = candidate === alt.names[0] ? alt.label : candidate;
-                return {url,kind:'similar',label:name,scientific:candidate};
-            }
-        }
+        const url=stickerMap.get(normalize(candidate));
+        if(url) return {url,kind:'exact',label:dutchName,scientific:candidate};
     }
     return null;
 }

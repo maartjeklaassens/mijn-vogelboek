@@ -103,6 +103,34 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 .sticker-credit{font-size:12px;color:#8f747d;margin:18px 0 0;line-height:1.6}
 @media(max-width:700px){.card-sticker-overlay{width:63px;height:63px;right:18px;top:150px}.bird-info-with-card-sticker{padding-right:16px;min-height:0}}
 @media(max-width:550px){.card-sticker-overlay{width:52px;height:52px;right:14px;top:140px}.bird-info-with-card-sticker{padding-right:11px;min-height:0}.modal-photo-badge{width:64px;height:64px;left:10px;bottom:8px}}
+
+/* v5: logo brengt je terug naar het echte startscherm. */
+.sidebar .logo{display:block;color:inherit;text-decoration:none;cursor:pointer}
+.sidebar .logo:hover{color:white}
+/* v5: badge verticaal op één lijn met de Nederlandse soortnaam. */
+.card-sticker-overlay{top:121px;right:22px;transform:translateY(-50%)}
+@media(max-width:700px){.card-sticker-overlay{top:121px;right:17px}}
+@media(max-width:550px){.card-sticker-overlay{top:109px;right:12px}}
+/* v5: alleen een pop bij toevoegen; geen vallende veertjes. */
+@keyframes stickerCelebrate{
+  0%{transform:scale(1) rotate(0deg)}
+  32%{transform:scale(1.6) rotate(-9deg)}
+  55%{transform:scale(1.35) rotate(7deg)}
+  78%{transform:scale(.94) rotate(-3deg)}
+  100%{transform:scale(1) rotate(0deg)}
+}
+.bird-card.sticker-celebrate .card-sticker-img,
+.bird-card.sticker-celebrate .hero-sticker,
+.bird-card.sticker-celebrate .sticker-stage svg,
+.bird-card.sticker-celebrate .card-sticker-overlay svg{
+  transform-origin:center 85%;animation:stickerCelebrate .72s cubic-bezier(.22,.8,.25,1) both !important;
+}
+@media(prefers-reduced-motion:reduce){
+  .bird-card.sticker-celebrate .card-sticker-img,
+  .bird-card.sticker-celebrate .hero-sticker,
+  .bird-card.sticker-celebrate .sticker-stage svg,
+  .bird-card.sticker-celebrate .card-sticker-overlay svg{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -115,7 +143,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=26"></script>
+<script type="module" src="./app.js?v=27"></script>
 
 <!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
