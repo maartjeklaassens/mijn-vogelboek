@@ -1,4 +1,5 @@
-import {seed} from './species.js?v=25';
+import {seed} from './species.js?v=22';
+import {loadStickerIndex, stickerFor} from './stickers.js?v=1';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -59,24 +60,7 @@ const groupPaths = {
 
 function groupIcon(groupName, size=48){
     const path = groupPaths[groupName] || groupPaths["Zangers"];
-    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="#a3425e" style="opacity:0.82;display:block;margin:auto">${path}</svg>`;
-}
-
-// 100% Waterdichte methode om de sticker in te laden met de directe GitHub URL
-function getStickerHtml(s, size, extraClass="") {
-    const base = "https://raw.githubusercontent.com/alchaincyf/huashu-bird-sticker/main/stickers/";
-    const n1 = s.scientific.replace(/ /g, '_');
-    const n2 = s.scientific.toLowerCase().replace(/ /g, '_');
-    
-    return `<div class="${extraClass}" style="position:relative; display:flex; align-items:center; justify-content:center; width:100%; height:100%; overflow:hidden;">
-        <img src="${base}${n1}.png" 
-             onerror="if(this.dataset.t!=='1'){this.dataset.t='1'; this.src='${base}${n2}.png';} else {this.style.display='none'; this.nextElementSibling.style.display='flex';}" 
-             style="width:100%; height:100%; object-fit:contain;" 
-             alt="${esc(s.name)}">
-        <div class="fallback-icon" style="display:none; width:100%; height:100%; align-items:center; justify-content:center;">
-            ${groupIcon(s.group, size)}
-        </div>
-    </div>`;
+    return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="#a3425e" style="opacity:0.82;display:block">${path}</svg>`;
 }
 
 function getHashPage(){
@@ -185,6 +169,13 @@ async function loadPhotos(){
     render();
 }
 
+function birdSticker(s, size=52, cls=''){
+    const url=stickerFor(s.scientific);
+    if(!url)return groupIcon(s.group,size);
+    return `<img class="bird-sticker ${cls}" src="${esc(url)}" alt="AI-sticker van ${esc(s.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
+      `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
+}
+
 function countSeen(){return Object.keys(entries).filter(k=>entries[k]?.seen).length}
 function countPhoto(){return Object.values(entries).filter(x=>x.seen&&(x.photo||x.photoPath)).length}
 
@@ -221,10 +212,9 @@ function dashboard(){
 function rowitem(s, blur=false){
     let e=entries[s.id],src=e?.photo||photoCache[s.id];
     let hwText = e?.date || e?.location ? `<br><span class="handwritten">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
-    
     let thumb = src 
         ? `<img class="thumb ${blur?'wazig':''}" src="${esc(src)}" alt="${esc(s.name)}">`
-        : getStickerHtml(s, 28, `thumb ${blur?'wazig':''}`);
+        : `<div class="thumb ${blur?'wazig':''}" style="display:flex;align-items:center;justify-content:center;overflow:hidden">${birdSticker(s,28)}</div>`;
 
     return `<div class="rowitem">${thumb}<div><b>${esc(s.name)}</b><br><span style="font-size:11px">${esc(s.group)} · ${esc(s.rarity)}</span>${hwText}</div><button class="link" data-edit="${esc(s.id)}">${canEdit?'Bewerk →':'Bekijk →'}</button></div>`;
 }
@@ -235,9 +225,8 @@ function card(s){
         ? `<div class="bird-bottom"><button data-toggle="${esc(s.id)}">${e?.seen?'✓ Gezien':'＋ Gezien'}</button><button data-edit="${esc(s.id)}">Details →</button></div>`
         : `<div class="bird-bottom"><button data-edit="${esc(s.id)}" style="width:100%">Bekijk details →</button></div>`;
     
-    let topVisual = src 
-        ? `<img src="${esc(src)}" alt="${esc(s.name)}" style="width:100%;height:100%;object-fit:cover;">`
-        : getStickerHtml(s, 52);
+    let topVisual = birdSticker(s,72);
+    if(src) topVisual+=`<img class="own-photo-corner" src="${esc(src)}" alt="Eigen foto van ${esc(s.name)}" loading="lazy" title="Jouw eigen foto">`;
 
     return `<div class="bird-card"><div class="bird-top">${topVisual}<div class="flag">${e?.seen?'✓ Gezien':'○ Niet gezien'}</div></div><div class="bird-info"><b>${esc(s.name)}</b><small>${esc(s.scientific)}</small><div class="counter" style="margin-top:8px">${esc(s.group)} · ${esc(s.rarity)} · ${src?'foto':'geen foto'}</div></div>${bottomBtns}</div>`;
 }
@@ -262,7 +251,7 @@ function vogels(){
         return a.idx - b.idx;
     });
 
-    return `${header('Alle vogels','Zoek, sorteer en bouw je persoonlijke levenslijst op.')}<div class="toolbar" style="margin-bottom:18px"><div class="filterbar"><input class="input search" id="search" placeholder="🔎 Zoek Nederlandse of Latijnse naam" value="${esc(term)}"><select class="select" id="group"><option>Alle groepen</option>${groups.map(g=>`<option ${group===g?'selected':''}>${esc(g)}</option>`).join('')}</select><select class="select" id="rarity"><option>Alle zeldzaamheden</option>${rarityOrder.map(r=>`<option ${rarity===r?'selected':''}>${esc(r)}</option>`).join('')}</select><select class="select" id="filter"><option value="alle" ${filter==='alle'?'selected':''}>Filter: Alle soorten</option><option value="gezien" ${filter==='gezien'?'selected':''}>Alleen gezien</option><option value="ongezien" ${filter==='ongezien'?'selected':''}>Alleen niet gezien</option><option value="zonderfoto" ${filter==='zonderfoto'?'selected':''}>Foto ontbreekt</option></select><select class="select" id="sort"><option value="standaard" ${sortBy==='standaard'?'selected':''}>Sorteer: Taxonomisch</option><option value="gezien-eerst" ${sortBy==='gezien-eerst'?'selected':''}>Sorteer: Gezien eerst</option><option value="ongezien-eerst" ${sortBy==='ongezien-eerst'?'selected':''}>Sorteer: Niet gezien eerst</option><option value="naam-az" ${sortBy==='naam-az'?'selected':''}>Sorteer: Naam (A–Z)</option></select></div><span class="counter">${arr.length} van ${species.length} soorten <small class="muted" style="display:block;font-size:11px;text-align:right">Bron: Dutch Avifauna (CSNA)</small></span></div><div class="birds">${arr.map(card).join('')}</div>${arr.length?'':'<div class="empty">Geen soorten gevonden voor deze filters.</div>'}`;
+    return `${header('Alle vogels','Zoek, sorteer en bouw je persoonlijke levenslijst op.')}<div class="toolbar" style="margin-bottom:18px"><div class="filterbar"><input class="input search" id="search" placeholder="🔎 Zoek Nederlandse of Latijnse naam" value="${esc(term)}"><select class="select" id="group"><option>Alle groepen</option>${groups.map(g=>`<option ${group===g?'selected':''}>${esc(g)}</option>`).join('')}</select><select class="select" id="rarity"><option>Alle zeldzaamheden</option>${rarityOrder.map(r=>`<option ${rarity===r?'selected':''}>${esc(r)}</option>`).join('')}</select><select class="select" id="filter"><option value="alle" ${filter==='alle'?'selected':''}>Filter: Alle soorten</option><option value="gezien" ${filter==='gezien'?'selected':''}>Alleen gezien</option><option value="ongezien" ${filter==='ongezien'?'selected':''}>Alleen niet gezien</option><option value="zonderfoto" ${filter==='zonderfoto'?'selected':''}>Foto ontbreekt</option></select><select class="select" id="sort"><option value="standaard" ${sortBy==='standaard'?'selected':''}>Sorteer: Taxonomisch</option><option value="gezien-eerst" ${sortBy==='gezien-eerst'?'selected':''}>Sorteer: Gezien eerst</option><option value="ongezien-eerst" ${sortBy==='ongezien-eerst'?'selected':''}>Sorteer: Niet gezien eerst</option><option value="naam-az" ${sortBy==='naam-az'?'selected':''}>Sorteer: Naam (A–Z)</option></select></div><span class="counter">${arr.length} van ${species.length} soorten <small class="muted" style="display:block;font-size:11px;text-align:right">Bron: Dutch Avifauna (CSNA)</small></span></div><div class="birds">${arr.map(card).join('')}</div><div class="sticker-credit">Stickers: <a href="https://github.com/alchaincyf/huashu-bird-sticker" target="_blank" rel="noopener noreferrer">huashu-bird-sticker</a> / <a href="https://birdalbum.com/" target="_blank" rel="noopener noreferrer">Bird Album</a> · CC BY 4.0 · AI-illustraties, geen foto's.</div>${arr.length?'':'<div class="empty">Geen soorten gevonden voor deze filters.</div>'}`;
 }
 
 function fotos(){const birds=species.filter(s=>entries[s.id]?.seen&&(entries[s.id].photo||entries[s.id].photoPath));const missing=species.filter(s=>entries[s.id]?.seen&&!entries[s.id].photo&&!entries[s.id].photoPath);return `${header("Mijn foto's",'Jouw eigen vogelfotocollectie.')}${birds.length?`<div class="photo-collage">${birds.map(stampCard).join('')}</div>`:'<div class="empty">Nog geen foto toegevoegd.</div>'}<section class="panel" style="margin-top:35px"><h2>Gezien, maar nog geen foto</h2>${missing.length?missing.map(s=>rowitem(s)).join(''):'<p class="muted">Nog geen soorten zonder foto.</p>'}</section>`}
@@ -292,16 +281,13 @@ function modalHtml(){
     const s=species.find(x=>x.id===modal);
     if(!s)return '';
     const e=entries[s.id]||{}, src=e.photo||photoCache[s.id];
+    const stickerPanel = `<div class="modal-sticker">${birdSticker(s,110)}<span>Illustratie (AI) · Huashu Bird Sticker</span></div>`;
     const hwText = e.date || e.location ? `<span class="handwritten" style="font-size:22px; margin-top:5px; padding-left:4px">${esc(e.date||'')} ${e.date&&e.location?',':''} ${esc(e.location||'')}</span>` : '';
     
-    let photoHtml = src 
-        ? `<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`
-        : `<div style="text-align:center; margin-bottom:16px; background:#f5e1e8; border-radius:12px; padding:20px; display:flex; justify-content:center; height:200px;">${getStickerHtml(s, 120)}</div>`;
-
     if(!canEdit){
-        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><div style="margin-top:20px">${photoHtml}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
+        return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div>${stickerPanel}<div style="margin-top:20px">${src?`<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`:''}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
     }
-    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div><form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${photoHtml}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
+    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div>${stickerPanel}<form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
 }
 
 function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><div class="logo">Mijn Vogelboek<small>Vogels verzamelen</small></div><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos()}
@@ -321,3 +307,5 @@ document.addEventListener('input',e=>{if(e.target.id==='search'){let pos=e.targe
 document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.target.value;render()}else if(e.target.id==='rarity'){rarity=e.target.value;render()}else if(e.target.id==='filter'){filter=e.target.value;render()}else if(e.target.id==='sort'){sortBy=e.target.value;render()}else if(e.target.id==='seen'){$('#obsfields').style.opacity=e.target.checked?'1':'.45'}});
 document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) spawnFeathers();}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
 initCloud();
+// Stickers zijn decoratief: een netwerkfout mag het vogelboek nooit blokkeren.
+loadStickerIndex().then(()=>render()).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));
