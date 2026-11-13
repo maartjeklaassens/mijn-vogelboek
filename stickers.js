@@ -18,6 +18,14 @@ const addCandidate = (out, p, origin) => {if(validPath(p)&&!out.some(x=>x.path==
 
 // Exacte alternatieve namen; alleen dezelfde soort, nooit een lookalike.
 const aliases = {
+  'tetrao tetrix':['Lyrurus tetrix'],
+  'microcarbo pygmeus':['Microcarbo pygmaeus'],
+  'charadrius morinellus':['Eudromias morinellus'],
+  'charadrius dubius':['Thinornis dubius'],
+  'athene vidalii':['Athene noctua'],
+  'dendropicos medius':['Dendrocoptes medius'],
+  'erythrina erythrina':['Carpodacus erythrinus'],
+  'sinosuthora webbiana':['Suthora webbiana'],
   'cygnus bewickii':['Cygnus columbianus'],
   'ixobrychus minutus':['Botaurus minutus'],
   'bubulcus ibis':['Ardea ibis'],
@@ -71,6 +79,16 @@ const explicitForms = {
   'amerikaanse grote stern': {parent:'Thalasseus sandvicensis', form:'acuflavidus'}
 };
 const dutchExact = {
+  // Brongetrouwe wetenschappelijke synoniemen en correcte schrijfwijzen.
+  // Deze overrides veranderen GEEN vogel-ID's of bestaande waarnemingen.
+  'korhoen':['Lyrurus tetrix'],
+  'dwergaalscholver':['Microcarbo pygmaeus'],
+  'morinelplevier':['Eudromias morinellus'],
+  'kleine plevier':['Thinornis dubius'],
+  'steenuil':['Athene noctua'],
+  'middelste bonte specht':['Dendrocoptes medius'],
+  'roodmus':['Carpodacus erythrinus'],
+  'bruinkopdiksnavelmees':['Suthora webbiana'],
   'kleine zwaan':['Cygnus bewickii','Cygnus columbianus'],
   'witbuikrotgans':['Branta hrota'], 'zwarte rotgans':['Branta nigricans'],
   'amerikaanse wintertaling':['Anas carolinensis'],
