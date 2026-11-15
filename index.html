@@ -133,6 +133,48 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 }
 
 .color-explainer{font-size:12px;line-height:1.6;color:#876b76;background:#fff;border:1px solid #f1dfe6;border-radius:12px;padding:11px 14px;margin:8px 0 20px}
+
+/* Everybird-geïnspireerde collage — geïsoleerd van de bestaande vogelkaartjes. */
+.vb-collage{background:#f6f4ef;color:#1e1e24;border:1px solid #dedad2;border-radius:20px;padding:clamp(15px,3vw,28px);margin-bottom:20px;overflow:hidden}
+.vb-collage-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.vb-collage-head h2{font-family:Georgia,serif;font-size:clamp(27px,4vw,39px);font-weight:700;letter-spacing:-.045em;margin:5px 0 6px}
+.vb-collage-head p{color:#66636a;font-size:14px;margin:0}
+.vb-collage-eyebrow{font:600 11px ui-monospace,monospace;letter-spacing:.13em;color:#92140c}
+.vb-collage-download{border:1px solid #dedad2;background:#1e1e24;color:#fff;border-radius:10px;padding:12px 15px;font-size:13px;font-weight:700;min-height:44px}
+.vb-collage-download:hover{background:#92140c}
+.vb-collage-tools{display:flex;align-items:center;flex-wrap:wrap;gap:12px;border:1px solid #dedad2;padding:6px;margin-top:20px;border-radius:15px;font-size:13px;min-height:53px}
+.vb-collage-tabs{display:flex;gap:4px}
+.vb-collage-tabs button{border:0;border-radius:10px;padding:9px 12px;background:transparent;color:#5f5f69;font-weight:600}
+.vb-collage-tabs button.is-selected{background:#ebe8e1;color:#92140c}
+.vb-collage-scientific{display:flex;align-items:center;gap:7px;cursor:pointer}
+.vb-collage-scientific input{accent-color:#92140c;width:16px;height:16px}
+.vb-collage-group-label{margin-left:auto;display:flex;align-items:center;gap:8px;color:#5f5f69}
+.vb-collage-group-label select{font-size:13px;max-width:240px;border:1px solid #dedad2;border-radius:8px;padding:8px;background:white;color:#1e1e24}
+.vb-collage-stage{position:relative;width:100%;background:#f6f4ef;isolation:isolate;overflow:visible;min-height:330px}
+.vb-collage-counter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1;pointer-events:none;white-space:nowrap}
+.vb-collage-counter strong{font-family:Georgia,serif;font-size:clamp(50px,8.5vw,110px);font-weight:700;letter-spacing:-.065em;line-height:.97;font-variant-numeric:tabular-nums}
+.vb-collage-counter span{font:600 12px ui-monospace,monospace;letter-spacing:.16em;color:#67636a;margin-top:9px}
+.vb-collage-empty{position:absolute;left:10%;right:10%;bottom:12%;text-align:center;font-size:13px;color:#68616a}
+.vb-collage-bird{position:absolute;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;transform:rotate(var(--rotate));transition:transform .2s cubic-bezier(.16,1,.3,1),filter .2s;animation:vb-collage-in .4s both;animation-delay:var(--delay);z-index:2}
+.vb-collage-bird img{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 2px 2px rgb(20 20 20 / .07))}
+.vb-collage-bird:hover,.vb-collage-bird:focus-visible{z-index:8;transform:rotate(0deg) scale(1.2);filter:drop-shadow(0 5px 8px rgb(30 30 30 / .16));outline-offset:4px}
+.vb-collage-outline{border:1px dashed #b0a99e;border-radius:50%;color:#b0a99e;font-size:24px}
+.vb-collage-hint{position:absolute;left:50%;bottom:calc(100% + 7px);transform:translateX(-50%);background:#1e1e24;color:white;font-size:12px;font-weight:600;border-radius:8px;white-space:nowrap;padding:7px 10px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10;max-width:240px;text-overflow:ellipsis;overflow:hidden}
+.vb-collage-bird:hover .vb-collage-hint,.vb-collage-bird:focus-visible .vb-collage-hint{opacity:1}
+.vb-collage-list{max-height:650px;overflow:auto;padding:15px 0}
+.vb-collage-list-row{border:0;border-bottom:1px solid #dedad2;display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:transparent;padding:7px 10px;color:#1e1e24}
+.vb-collage-list-row:hover{background:#ebe8e1}
+.vb-collage-list-row>span:nth-child(2){flex:1}
+.vb-collage-list-row strong,.vb-collage-list-row small{display:block}
+.vb-collage-list-row small{color:#777178;font-style:italic;margin-top:3px}
+.vb-collage-mini{width:52px;height:52px;display:grid;place-items:center;flex:none;color:#a7a198}
+.vb-collage-mini img{max-height:100%;max-width:100%;object-fit:contain}
+.vb-collage-foot{border-top:1px solid #dedad2;padding-top:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px;color:#777178;font-size:11px}
+.vb-collage-foot a{color:#92140c}
+@keyframes vb-collage-in{from{opacity:0;scale:.75}to{opacity:1;scale:1}}
+@media(max-width:620px){.vb-collage{padding:13px}.vb-collage-head{align-items:flex-start}.vb-collage-download{width:100%}.vb-collage-tools{gap:8px}.vb-collage-group-label{width:100%;justify-content:space-between;margin:0}.vb-collage-group-label select{max-width:63%}.vb-collage-scientific{font-size:12px}.vb-collage-counter strong{font-size:clamp(54px,15vw,80px)}.vb-collage-hint{display:none}}
+@media(prefers-reduced-motion:reduce){.vb-collage-bird{animation:none;transition:none}}
+
 </style>
 </head>
 <body>
@@ -145,7 +187,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=31"></script>
+<script type="module" src="./app.js?v=33"></script>
 
 <!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
