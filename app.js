@@ -1,6 +1,5 @@
-import {KLEUREN, KLEUR_HEX, kleurenVoor, ingedeeldAantal} from './kleuren.js?v=1';
 import {seed} from './species.js?v=22';
-import {collagePanelHtml, mountCollage} from './collage.js?v=1';
+import {collagePanelHtml, mountCollage} from './collage.js?v=2';
 import {loadStickerIndex, stickerMatch, stickerCandidates, stickerDiagnostics} from './stickers.js?v=12';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -70,13 +69,6 @@ function getHashPage(){
     return validPages.includes(h)?h:'dashboard';
 }
 
-function getHeroTimeProps() {
-    const h = new Date().getHours();
-    if(h >= 5 && h < 11) return {class:'morning', eye:'VROEGE VOGEL', title:'De natuur ontwaakt', emoji:'🌅'};
-    if(h >= 18 || h < 5) return {class:'night', eye:'NACHTUIL', title:'Tijd voor uilen en nachtzwaluwen', emoji:'🌙'};
-    return {class:'', eye:'JOUW LEVENSLIJST', title:'Houd je waarnemingen bij', emoji:'🔭'};
-}
-
 // Een korte pop-animatie op de sticker van de net aangevinkte soort.
 function celebrateSeen(id){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -91,7 +83,7 @@ function celebrateSeen(id){
     }
 }
 
-let page=getHashPage(),term='',group='Alle groepen',rarity='Alle zeldzaamheden',filter='alle',sortBy='standaard',kleurFilter='Alle kleuren',modal=null, busy=false, message='',msgType='notice';
+let page=getHashPage(),term='',group='Alle groepen',rarity='Alle zeldzaamheden',filter='alle',sortBy='standaard',modal=null, busy=false, message='',msgType='notice';
 let species=seed.map((s,idx)=>({...s, idx, rarity:getRarity(s)}));
 let entries=JSON.parse(localStorage.getItem('vogelboek-entries')||'{}');
 let supabase=null,session=null,cloud=false,canEdit=false;
@@ -122,10 +114,10 @@ async function initCloud(){
 async function fetchCloud(){
     if(!supabase)return;
     try{
-        const {data,error}=await supabase.from('observations').select('species_id,seen_date,location,photo_path,created_at');
+        const {data,error}=await supabase.from('observations').select('species_id,seen_date,location,photo_path,is_proof_photo,created_at');
         if(error)throw error;
         entries={};
-        for(const d of data)entries[d.species_id]={seen:true,date:d.seen_date||'',location:d.location||'',photoPath:d.photo_path||''};
+        for(const d of data)entries[d.species_id]={seen:true,date:d.seen_date||'',location:d.location||'',photoPath:d.photo_path||'',proofPhoto:!!d.is_proof_photo};
         cloud=true; photoCache={};
         render();
     }catch(e){notify('Ophalen mislukt: '+e.message,'error')}
@@ -141,7 +133,7 @@ async function persist(id,obj,file){
         const up=await supabase.storage.from('bird-photos').upload(path,file,{contentType:file.type});
         if(up.error)throw up.error;
     }
-    const {error}=await supabase.from('observations').upsert({user_id:session.user.id,species_id:id,seen_date:obj.date||null,location:obj.location||null,photo_path:path},{onConflict:'user_id,species_id'});
+    const {error}=await supabase.from('observations').upsert({user_id:session.user.id,species_id:id,seen_date:obj.date||null,location:obj.location||null,photo_path:path,is_proof_photo:!!obj.proofPhoto},{onConflict:'user_id,species_id'});
     if(error)throw error;
     entries[id]={...obj,photoPath:path};
 }
@@ -216,7 +208,6 @@ function stat(label,value){return `<div class="stat"><span>${label}</span><b>${v
 function dashboard(){
     const seen=countSeen(),photos=countPhoto();
     const recent=species.filter(s=>entries[s.id]?.seen).slice(-5);
-    const tp = getHeroTimeProps();
     
     return `<div class="top"><div><div class="eyebrow">Mijn persoonlijke natuurdagboek</div><h1>Welkom in je vogelboek</h1><div class="muted">Overzicht van al je waarnemingen en foto's.</div></div></div>
 ${collagePanelHtml(species,entries)}
@@ -255,7 +246,6 @@ function vogels(){
         (s.name+' '+s.scientific).toLowerCase().includes(term.toLowerCase()) &&
         (group==='Alle groepen'||s.group===group) &&
         (rarity==='Alle zeldzaamheden'||s.rarity===rarity) &&
-        (kleurFilter==='Alle kleuren'||(kleurFilter==='Niet ingedeeld'?!kleurenVoor(s).length:kleurenVoor(s).includes(kleurFilter))) &&
         (filter==='alle'||(filter==='gezien'&&entries[s.id]?.seen)||(filter==='ongezien'&&!entries[s.id]?.seen)||(filter==='zonderfoto'&&entries[s.id]?.seen&&!entries[s.id]?.photo&&!entries[s.id]?.photoPath))
     );
 
@@ -265,20 +255,24 @@ function vogels(){
         if(sortBy==='gezien-eerst' && seenA!==seenB) return seenB - seenA;
         if(sortBy==='ongezien-eerst' && seenA!==seenB) return seenA - seenB;
         if(sortBy==='naam-az') return a.name.localeCompare(b.name,'nl');
-        if(sortBy==='kleur'){
-            const aa=kleurenVoor(a)[0]||'zzz';
-            const bb=kleurenVoor(b)[0]||'zzz';
-            const ca=KLEUREN.indexOf(aa),cb=KLEUREN.indexOf(bb);
-            if(ca!==cb)return (ca<0?999:ca)-(cb<0?999:cb);
-            return a.name.localeCompare(b.name,'nl');
-        }
         return a.idx - b.idx;
     });
 
-    return `${header('Alle vogels','Zoek, sorteer en bouw je persoonlijke levenslijst op.')}<div class="toolbar" style="margin-bottom:18px"><div class="filterbar"><input class="input search" id="search" placeholder="🔎 Zoek Nederlandse of Latijnse naam" value="${esc(term)}"><select class="select" id="group"><option>Alle groepen</option>${groups.map(g=>`<option ${group===g?'selected':''}>${esc(g)}</option>`).join('')}</select><select class="select" id="rarity"><option>Alle zeldzaamheden</option>${rarityOrder.map(r=>`<option ${rarity===r?'selected':''}>${esc(r)}</option>`).join('')}</select><select class="select" id="filter"><option value="alle" ${filter==='alle'?'selected':''}>Filter: Alle soorten</option><option value="gezien" ${filter==='gezien'?'selected':''}>Alleen gezien</option><option value="ongezien" ${filter==='ongezien'?'selected':''}>Alleen niet gezien</option><option value="zonderfoto" ${filter==='zonderfoto'?'selected':''}>Foto ontbreekt</option></select><select class="select" id="kleur" aria-label="Filter op verenkleedkleur"><option value="Alle kleuren">Kleur: alle</option>${KLEUREN.map(k=>`<option value="${k}" ${kleurFilter===k?'selected':''}>${k}</option>`).join('')}<option value="Niet ingedeeld" ${kleurFilter==='Niet ingedeeld'?'selected':''}>Nog niet ingedeeld</option></select><select class="select" id="sort"><option value="standaard" ${sortBy==='standaard'?'selected':''}>Sorteer: Taxonomisch</option><option value="gezien-eerst" ${sortBy==='gezien-eerst'?'selected':''}>Sorteer: Gezien eerst</option><option value="ongezien-eerst" ${sortBy==='ongezien-eerst'?'selected':''}>Sorteer: Niet gezien eerst</option><option value="naam-az" ${sortBy==='naam-az'?'selected':''}>Sorteer: Naam (A–Z)</option><option value="kleur" ${sortBy==='kleur'?'selected':''}>Sorteer: hoofdkleur</option></select></div><span class="counter">${arr.length} van ${species.length} soorten <small class="muted" style="display:block;font-size:11px;text-align:right">Bron: Dutch Avifauna (CSNA)</small></span></div><div class="color-explainer">🎨 Kleurfilter: zichtbare kleuren in het verenkleed, niet de snavel of poten. Eén soort kan bij meerdere kleuren horen. ${ingedeeldAantal(species)} van ${species.length} soorten zijn voorlopig handmatig ingedeeld; de rest blijft bewust ongeclassificeerd. Kleed kan verschillen per geslacht, leeftijd en seizoen.</div><div class="birds">${arr.map(card).join('')}</div><div class="sticker-credit">Stickers: <a href="https://github.com/alchaincyf/huashu-bird-sticker" target="_blank" rel="noopener noreferrer">huashu-bird-sticker</a> / <a href="https://birdalbum.com/" target="_blank" rel="noopener noreferrer">Bird Album</a> · CC BY 4.0 · AI-illustraties, geen foto's.</div>${arr.length?'':'<div class="empty">Geen soorten gevonden voor deze filters.</div>'}`;
+    return `${header('Alle vogels','Zoek, sorteer en bouw je persoonlijke levenslijst op.')}<div class="toolbar" style="margin-bottom:18px"><div class="filterbar"><input class="input search" id="search" placeholder="🔎 Zoek Nederlandse of Latijnse naam" value="${esc(term)}"><select class="select" id="group"><option>Alle groepen</option>${groups.map(g=>`<option ${group===g?'selected':''}>${esc(g)}</option>`).join('')}</select><select class="select" id="rarity"><option>Alle zeldzaamheden</option>${rarityOrder.map(r=>`<option ${rarity===r?'selected':''}>${esc(r)}</option>`).join('')}</select><select class="select" id="filter"><option value="alle" ${filter==='alle'?'selected':''}>Filter: Alle soorten</option><option value="gezien" ${filter==='gezien'?'selected':''}>Alleen gezien</option><option value="ongezien" ${filter==='ongezien'?'selected':''}>Alleen niet gezien</option><option value="zonderfoto" ${filter==='zonderfoto'?'selected':''}>Foto ontbreekt</option></select><select class="select" id="sort"><option value="standaard" ${sortBy==='standaard'?'selected':''}>Sorteer: Taxonomisch</option><option value="gezien-eerst" ${sortBy==='gezien-eerst'?'selected':''}>Sorteer: Gezien eerst</option><option value="ongezien-eerst" ${sortBy==='ongezien-eerst'?'selected':''}>Sorteer: Niet gezien eerst</option><option value="naam-az" ${sortBy==='naam-az'?'selected':''}>Sorteer: Naam (A–Z)</option></select></div><span class="counter">${arr.length} van ${species.length} soorten <small class="muted" style="display:block;font-size:11px;text-align:right">Bron: Dutch Avifauna (CSNA)</small></span></div><div class="birds">${arr.map(card).join('')}</div><div class="sticker-credit">Stickers: <a href="https://github.com/alchaincyf/huashu-bird-sticker" target="_blank" rel="noopener noreferrer">huashu-bird-sticker</a> / <a href="https://birdalbum.com/" target="_blank" rel="noopener noreferrer">Bird Album</a> · CC BY 4.0 · AI-illustraties, geen foto's.</div>${arr.length?'':'<div class="empty">Geen soorten gevonden voor deze filters.</div>'}`;
 }
 
-function fotos(){const birds=species.filter(s=>entries[s.id]?.seen&&(entries[s.id].photo||entries[s.id].photoPath));const missing=species.filter(s=>entries[s.id]?.seen&&!entries[s.id].photo&&!entries[s.id].photoPath);return `${header("Mijn foto's",'Jouw eigen vogelfotocollectie.')}${birds.length?`<div class="photo-collage">${birds.map(stampCard).join('')}</div>`:'<div class="empty">Nog geen foto toegevoegd.</div>'}<section class="panel" style="margin-top:35px"><h2>Gezien, maar nog geen foto</h2>${missing.length?missing.map(s=>rowitem(s)).join(''):'<p class="muted">Nog geen soorten zonder foto.</p>'}</section>`}
+function fotos(){
+    const hasPhoto=s=>entries[s.id]?.seen&&(entries[s.id].photo||entries[s.id].photoPath);
+    const allPhotos=species.filter(hasPhoto);
+    const mooi=allPhotos.filter(s=>!entries[s.id]?.proofPhoto);
+    const bewijs=allPhotos.filter(s=>entries[s.id]?.proofPhoto);
+    const missing=species.filter(s=>entries[s.id]?.seen&&!hasPhoto(s));
+    return `${header("Mijn foto's",'Jouw eigen vogelfotocollectie.')}${mooi.length
+      ? `<div class="photo-collage">${mooi.map(stampCard).join('')}</div>`
+      : '<div class="empty">Nog geen gewone foto’s toegevoegd.</div>'}
+      <section class="panel" style="margin-top:35px"><h2>Gezien, maar nog geen foto</h2>${missing.length?missing.map(s=>rowitem(s)).join(''):'<p class="muted">Nog geen soorten zonder foto.</p>'}</section>
+      ${bewijs.length?`<section class="proof-photo-section"><h2>Bewijsfoto's <span class="proof-photo-count">${bewijs.length}</span></h2><p class="muted">Wel vastgelegd, maar niet tussen je uitgelichte foto's.</p><div class="proof-photo-grid">${bewijs.map(stampCard).join('')}</div></section>`:''}`;
+}
 
 function ontdekken(){
     const missing=species.filter(s=>entries[s.id]?.seen&&!entries[s.id]?.photo&&!entries[s.id]?.photoPath);
@@ -311,7 +305,7 @@ function modalHtml(){
     if(!canEdit){
         return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div>${stickerPanel}<div style="margin-top:20px">${src?`<img class="photo" style="height:auto;max-height:380px;margin-bottom:16px;border-radius:12px" src="${esc(src)}" alt="Eigen foto">`:''}<div class="grid2"><div class="stat" style="padding:14px"><span>Status</span><b style="font-size:18px">${e.seen?'✓ Gezien':'○ Nog niet gezien'}</b></div><div class="stat" style="padding:14px"><span>Notitie</span><br>${hwText||'<span class="muted" style="font-size:13px">—</span>'}</div></div></div></div></div>`;
     }
-    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div>${stickerPanel}<form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
+    return `<div class="overlay" id="overlay"><div class="modal"><div class="modalhead"><div><div class="eyebrow">${esc(s.group)} · ${esc(s.rarity)}</div><h2 style="margin:5px 0">${esc(s.name)}</h2><i class="muted">${esc(s.scientific)}</i></div><button class="x" id="close">×</button></div>${stickerPanel}<form id="obsform" style="margin-top:22px"><label class="formfield" style="display:flex;align-items:center;gap:10px;flex-direction:row;font-size:16px"><input type="checkbox" id="seen" name="seen" ${e.seen?'checked':''} style="width:19px;height:19px"> Deze soort heb ik gezien</label><div id="obsfields"><div class="grid2"><label class="formfield">Datum <small>optioneel</small><input class="input" type="date" name="date" value="${esc(e.date||'')}"></label><label class="formfield">Locatie <small>optioneel</small><input class="input" name="location" maxlength="240" placeholder="Bijv. Lauwersmeer" value="${esc(e.location||'')}"></label></div><label class="formfield">Mijn eigen foto <small>optioneel; jpg/png/webp, maximaal 8 MB online</small><input class="input" type="file" name="photo" accept="image/*"></label><label class="proof-photo-option"><input type="checkbox" name="proofPhoto" ${e.proofPhoto?'checked':''}><span><b>Dit is een bewijsfoto</b><small>Deze foto komt onderaan bij Mijn foto's, niet tussen mijn mooiste foto's.</small></span></label>${src?`<img class="photo" src="${esc(src)}" alt="Eigen foto">`:''}</div><div style="display:flex;justify-content:space-between;gap:10px;margin-top:25px"><button type="button" class="button danger" id="delete" ${!e.seen?'disabled':''}>Verwijder waarneming</button><button type="submit" class="button" id="save">Opslaan</button></div></form></div></div>`;
 }
 
 function render(){const views={dashboard,vogels,fotos,ontdekken,statistieken:stats,instellingen:settings};$('#app').innerHTML=`<div class="shell"><aside class="sidebar"><a class="logo" href="./" aria-label="Terug naar de startpagina van Mijn Vogelboek">Mijn Vogelboek<small>Vogels verzamelen</small></a><div class="nav">${nav()}</div><div class="foot"><div class="account"><button class="button alt" data-page="instellingen" style="display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px">${iconGear}<span>Instellingen</span></button></div><p>Een online dagboek voor vogels.</p></div></aside><main class="main">${message?`<div class="notice ${msgType}">${esc(message)} <button class="link" id="dismiss">×</button></div>`:''}${(views[page]||dashboard)()}</main><nav class="mobile-nav">${tabs.map(([k,ic,t])=>`<button data-page="${k}" class="${k===page?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${ic}</span>${t}</button>`).join('')}<button data-page="instellingen" class="${page==='instellingen'?'active':''}"><span style="font-size:19px;display:flex;align-items:center;height:22px">${iconGear}</span><span>Instellingen</span></button></nav></div>${modalHtml()}`;const f=$('#obsfields');if(f&&$('#seen'))f.style.opacity=$('#seen').checked?'1':'.45';if(supabase&&Object.values(entries).some(e=>e.photoPath)&&Object.entries(entries).some(([id,e])=>e.photoPath&&!Object.prototype.hasOwnProperty.call(photoCache,id)))loadPhotos();if(page==='dashboard')mountCollage({species,entries,stickerCandidates,onSelect:id=>{modal=id;render();}})}
@@ -328,8 +322,8 @@ window.addEventListener('hashchange',()=>{
 
 document.addEventListener('click',async ev=>{let t=ev.target.closest('[data-page],[data-edit],[data-toggle],#close,#delete,#logout,#export,#dismiss');if(!t)return;if(t.dataset.page){const target=t.dataset.page;if(location.hash==='#'+target){page=target;modal=null;render();window.scrollTo(0,0)}else{location.hash=target}}else if(t.dataset.edit){modal=t.dataset.edit;render()}else if(t.dataset.toggle){const id=t.dataset.toggle;try{let wasSeen = entries[id]?.seen; if(wasSeen){await removeEntry(id)}else{await persist(id,{seen:true,date:'',location:''});}render();if(!wasSeen)celebrateSeen(id)}catch(e){notify(e.message,'error')}}else if(t.id==='close'){modal=null;render()}else if(t.id==='dismiss'){message='';render()}else if(t.id==='delete'){if(!confirm('Wil je deze waarneming verwijderen?'))return;try{await removeEntry(modal);modal=null;render()}catch(e){notify(e.message,'error')}}else if(t.id==='logout'){await supabase.auth.signOut();session=null;canEdit=false;await fetchCloud();render()}else if(t.id==='export'){const payload=JSON.stringify({version:1,species,entries},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([payload],{type:'application/json'}));a.download='mijn-vogelboek-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}});
 document.addEventListener('input',e=>{if(e.target.id==='search'){let pos=e.target.selectionStart;term=e.target.value;render();const el=$('#search');el.focus();el.setSelectionRange(pos,pos)}});
-document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.target.value;render()}else if(e.target.id==='rarity'){rarity=e.target.value;render()}else if(e.target.id==='filter'){filter=e.target.value;render()}else if(e.target.id==='sort'){sortBy=e.target.value;render()}else if(e.target.id==='kleur'){kleurFilter=e.target.value;render()}else if(e.target.id==='seen'){$('#obsfields').style.opacity=e.target.checked?'1':'.45'}});
-document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}const savedSpeciesId=modal;modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) celebrateSeen(savedSpeciesId);}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
+document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.target.value;render()}else if(e.target.id==='rarity'){rarity=e.target.value;render()}else if(e.target.id==='filter'){filter=e.target.value;render()}else if(e.target.id==='sort'){sortBy=e.target.value;render()}else if(e.target.id==='seen'){$('#obsfields').style.opacity=e.target.checked?'1':'.45'}});
+document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value,proofPhoto:f.elements.proofPhoto.checked},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}const savedSpeciesId=modal;modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) celebrateSeen(savedSpeciesId);}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
 initCloud();
 // Stickers zijn decoratief: een netwerkfout mag het vogelboek nooit blokkeren.
 loadStickerIndex().then(()=>{const r=stickerDiagnostics(species);console.info('Stickerkandidaten:',r.candidates,'/',r.total,'; zonder match:',r.unresolved.length);render();}).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));

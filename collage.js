@@ -150,7 +150,7 @@ async function exportPng(stage,positions,count){
 
 export function collagePanelHtml(species,entries){
   const count=species.filter(s=>entries[s.id]?.seen).length;
-  return `<section class="vb-collage" id="vb-collage" aria-label="Mijn vogelcollage"><div class="vb-collage-head"><div><div class="vb-collage-eyebrow">JOUW LEVENSLIJST</div><h2>Mijn vogelcollage</h2><p>Iedere sticker is een vogel die je zelf hebt gezien.</p></div><button type="button" class="vb-collage-download" id="vb-collage-download" ${count?'':'disabled'}>↓ Bewaar als afbeelding</button></div><div class="vb-collage-tools"><div class="vb-collage-tabs" role="group" aria-label="Weergave"><button type="button" data-collage-view="collage" class="${chosenView==='collage'?'is-selected':''}" aria-pressed="${chosenView==='collage'}">Collage</button><button type="button" data-collage-view="list" class="${chosenView==='list'?'is-selected':''}" aria-pressed="${chosenView==='list'}">Lijst</button></div><label class="vb-collage-scientific"><input type="checkbox" id="vb-collage-scientific" ${scientificLabels?'checked':''}> Wetenschappelijke namen</label><label class="vb-collage-group-label">Vogelgroep <select id="vb-collage-group"><option value="alle">Alle groepen</option>${[...new Set(species.map(s=>s.group))].sort((a,b)=>a.localeCompare(b,'nl')).map(g=>`<option value="${escapeHtml(g)}" ${g===groupFilter?'selected':''}>${escapeHtml(g)}</option>`).join('')}</select></label></div><div id="vb-collage-content" aria-live="polite">${stageHtml([],count)}</div><div class="vb-collage-foot"><span id="vb-collage-foot-count">${count} geziene soorten</span><span>Stickers: <a href="https://github.com/alchaincyf/huashu-bird-sticker" target="_blank" rel="noopener noreferrer">huashu-bird-sticker</a> · CC BY 4.0 · Collage geïnspireerd door <a href="https://everybird.yusuftaleb.com/" target="_blank" rel="noopener noreferrer">Everybird</a></span></div></section>`;
+  return `<section class="vb-collage" id="vb-collage" aria-label="Vogelcollage van ${count} geziene soorten"><div id="vb-collage-content">${stageHtml([],count)}</div></section>`;
 }
 
 export function mountCollage({species,entries,stickerCandidates,onSelect}){
@@ -161,13 +161,10 @@ export function mountCollage({species,entries,stickerCandidates,onSelect}){
   const all=validBirds(species,entries,stickerCandidates);
   function paint(){
     if(disposed||!root.isConnected)return;
-    const filtered=groupFilter==='alle'?all:all.filter(b=>b.group===groupFilter);
+    const filtered=all;
     activeBirds=filtered;
-    root.querySelector('#vb-collage-foot-count').textContent=`${filtered.length} van ${all.length} geziene soorten`;
     const width=Math.min(1130,Math.max(260,Math.floor(content.getBoundingClientRect().width)));
-    if(chosenView==='list'){
-      content.innerHTML=listHtml(filtered);activePositions=[];return;
-    }
+
     content.innerHTML=stageHtml(filtered,filtered.length);
     const stage=content.querySelector('#vb-collage-stage');
     if(!filtered.length){stage.style.height='330px';activePositions=[];return;}
@@ -177,26 +174,13 @@ export function mountCollage({species,entries,stickerCandidates,onSelect}){
     createStickers(stage,result.positions);
     if(result.missing)console.warn(`Vogelcollage: ${result.missing} stickers pasten niet in de beschikbare ruimte.`);
   }
-  function changeView(next){chosenView=next;root.querySelectorAll('[data-collage-view]').forEach(el=>{const active=el.dataset.collageView===next;el.classList.toggle('is-selected',active);el.setAttribute('aria-pressed',String(active));});paint();}
   function clicks(e){
-    const v=e.target.closest('[data-collage-view]');if(v){changeView(v.dataset.collageView);return;}
-    const bird=e.target.closest('[data-collage-species]');if(bird){onSelect(bird.dataset.collageSpecies);return;}
-    if(e.target.closest('#vb-collage-download')){
-      const button=root.querySelector('#vb-collage-download');button.disabled=true;button.textContent='Afbeelding maken…';
-      const stage=root.querySelector('#vb-collage-stage');
-      if(chosenView==='list'){changeView('collage');}
-      exportPng(root.querySelector('#vb-collage-stage'),activePositions,activeBirds.length)
-        .catch(err=>{console.error(err);alert('Opslaan lukte niet. Controleer of de stickerafbeeldingen bereikbaar zijn.');})
-        .finally(()=>{button.disabled=false;button.textContent='↓ Bewaar als afbeelding';});
-    }
+    const bird=e.target.closest('[data-collage-species]');
+    if(bird)onSelect(bird.dataset.collageSpecies);
   }
-  function changed(e){
-    if(e.target.id==='vb-collage-scientific'){scientificLabels=e.target.checked;paint();}
-    if(e.target.id==='vb-collage-group'){groupFilter=e.target.value;paint();}
-  }
-  root.addEventListener('click',clicks);root.addEventListener('change',changed);
+  root.addEventListener('click',clicks);
   observer=new ResizeObserver(entries=>{const w=Math.round(entries[0].contentRect.width);if(Math.abs(w-lastWidth)>12){lastWidth=w;paint();}});
   observer.observe(content);
   paint();
-  lastCleanup=()=>{disposed=true;observer.disconnect();root.removeEventListener('click',clicks);root.removeEventListener('change',changed)};
+  lastCleanup=()=>{disposed=true;observer.disconnect();root.removeEventListener('click',clicks)};
 }

@@ -8,18 +8,11 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c25977'/%3E%3Cg transform='translate(4,4)' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 7h.01'/%3E%3Cpath d='M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20'/%3E%3Cpath d='m20 7 2 .5-2 .5'/%3E%3Cpath d='M10 18v3'/%3E%3Cpath d='M14 17.75V21'/%3E%3Cpath d='M7 18a6 6 0 0 0 3.84-10.61'/%3E%3C/g%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#4a2b33;background:#fcf5f7}*{box-sizing:border-box}body{margin:0;position:relative}
-
-/* Subtiele papier-textuur over de hele site */
-body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9999; background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23f)" opacity="0.05"/></svg>'); mix-blend-mode: multiply; }
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#4a2b33;background:#ffffff}*{box-sizing:border-box}body{margin:0;position:relative}
 
 button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.shell{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}.sidebar{background:#c25977;color:#fdf0f4;padding:27px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:20px}.logo{font-family:Georgia,serif;font-size:27px;letter-spacing:-.8px;padding:8px}.logo small{font:600 11px system-ui;display:block;letter-spacing:2px;color:#e8bac8;text-transform:uppercase;margin-top:5px}.nav{display:grid;gap:7px}.nav button{background:transparent;color:#f0d1dc;border:0;border-radius:11px;padding:13px 14px;text-align:left;transition:all 0.2s}.nav button.active,.nav button:hover{background:#a3425e;color:white}.sidebar .foot{margin-top:auto;font-size:12px;color:#e8bac8;line-height:1.6}.main{padding:38px clamp(20px,5vw,76px);max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:29px}.eyebrow{color:#9c6e7d;text-transform:uppercase;letter-spacing:2px;font-weight:750;font-size:11px}h1{font:normal clamp(34px,4vw,52px) Georgia,serif;letter-spacing:-1.8px;margin:7px 0 10px}h2{font:normal 28px Georgia,serif;margin:0 0 15px}h3{margin:0 0 8px;font-size:17px}.muted{color:#8f747d}.pill{background:#f5e1e8;color:#7a3c4f;border-radius:30px;padding:9px 14px;font-size:12px}.button{border:0;border-radius:12px;background:#c25977;color:white;padding:11px 17px;font-weight:650;transition:transform 0.1s}.button:active{transform:scale(0.97)}.button.alt{background:#f5e1e8;color:#7a3c4f}.button.outline{background:transparent;border:1px solid #e3c1cd;color:#7a3c4f}.button.danger{background:#fae9e5;color:#8b362f}.hero{background:linear-gradient(112deg,#c25977,#d4738e);border-radius:22px;padding:32px;color:white;display:flex;justify-content:space-between;align-items:center;gap:24px;min-height:178px;transition:background 0.5s}.hero h2{font-size:34px;margin:0 0 8px}.hero p{max-width:540px;line-height:1.6;margin:0;opacity:0.9}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:22px 0 30px}.stat,.panel,.bird-card{background:#fff;border:1px solid #f2e1e6;border-radius:16px;padding:21px}.stat b{display:block;font:normal 34px Georgia,serif;margin:8px 0 3px}.stat span{font-size:13px;color:#8f747d}.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:20px}.panel{padding:23px;margin-bottom:20px}.panel-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}.link{background:none;border:0;color:#a3425e;font-weight:700}.birds{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.bird-card{padding:0;overflow:hidden;display:flex;flex-direction:column;position:relative}.bird-top{height:105px;background:#f5e1e8;display:flex;align-items:center;justify-content:center;font-size:51px;position:relative;overflow:hidden}.bird-top img{width:100%;height:100%;object-fit:cover}.flag{position:absolute;right:10px;top:10px;background:white;border-radius:20px;padding:5px 9px;font-size:11px;font-weight:700;color:#7a3c4f;z-index:2}.bird-info{padding:16px;flex:1}.bird-info b{display:block;margin-bottom:4px}.bird-info small{display:block;color:#a18790;font-style:italic}.bird-bottom{display:flex;border-top:1px solid #f5e1e8}.bird-bottom button{width:50%;padding:11px 6px;background:white;border:0;color:#7a3c4f;font-size:12px;transition:background 0.2s}.bird-bottom button+button{border-left:1px solid #f5e1e8}.bird-bottom button:hover{background:#fcf5f7}.filters{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.input,.select,.textarea{padding:12px;border:1px solid #ebd3dc;border-radius:10px;background:white;color:#4a2b33;width:100%;outline-color:#c25977}.input[type=file]{padding:8px}.search{max-width:370px}.filterbar{display:flex;gap:10px;flex-wrap:wrap}.filterbar .select{width:auto;min-width:155px}.empty{color:#9c858d;padding:35px;text-align:center;background:white;border:1px dashed #ebd3dc;border-radius:16px}.rowitem{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #f2e1e6}.rowitem:last-child{border:0}.rowitem span{font-size:13px;color:#8f747d}.rowitem button{margin-left:auto}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}.formfield{display:grid;gap:7px;margin-bottom:15px;font-size:13px;font-weight:650}.formfield small{color:#9c858d;font-weight:400}.overlay{position:fixed;inset:0;background:#2b151db0;display:grid;place-items:center;padding:16px;z-index:10}.modal{background:#fff;border-radius:21px;padding:26px;width:min(550px,100%);max-height:94vh;overflow:auto;box-shadow:0 30px 90px #0003}.modalhead{display:flex;justify-content:space-between;align-items:center}.x{border:0;background:#f5e1e8;color:#7a3c4f;width:34px;height:34px;border-radius:50%;font-size:20px}.notice{background:#fff4d8;color:#785b25;border-radius:12px;padding:13px 16px;font-size:13px;line-height:1.5;margin:15px 0}.success{background:#fdf2f5;color:#85304f}.error{background:#ffebeb;color:#982d2d}.photo{height:200px;width:100%;object-fit:cover;border-radius:12px}.sectionlead{line-height:1.6;color:#8f747d}.chartline{display:flex;align-items:center;gap:14px;margin:13px 0;font-size:13px}.chartline label{width:210px;flex-shrink:0;line-height:1.35}.track{height:12px;background:#f5e1e8;flex:1;border-radius:20px;overflow:hidden}.track>div{height:100%;background:#c25977;border-radius:20px}.chartline span{width:48px;flex-shrink:0;text-align:right;font-variant-numeric:tabular-nums;color:#8f747d}.setup{padding:18px;background:#fdf5f7;border-radius:14px;font-size:13px;line-height:1.8}.mobile-nav{display:none}a{color:#a3425e}.thumb{width:55px;height:55px;object-fit:cover;border-radius:10px;background:#f5e1e8}.toolbar{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;align-items:center}.counter{font-size:13px;color:#a18790}.account{border-top:1px solid #f2e1e6;padding-top:12px}.account button{margin-top:8px;width:100%}
 
 /* --- NIEUWE SFEER EFFECTEN --- */
-
-/* Tijd-afhankelijke Hero Banner */
-.hero.morning { background: linear-gradient(112deg, #ff8c7a, #f7c3b2); }
-.hero.night { background: linear-gradient(112deg, #1b263b, #415a77); }
 
 /* Handgeschreven tekst (vulpen effect) */
 .handwritten { font-family: 'Caveat', cursive; font-size: 19px; color: #1e3a5f; transform: rotate(-2deg); display: inline-block; padding-top: 4px; }
@@ -175,6 +168,29 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 @media(max-width:620px){.vb-collage{padding:13px}.vb-collage-head{align-items:flex-start}.vb-collage-download{width:100%}.vb-collage-tools{gap:8px}.vb-collage-group-label{width:100%;justify-content:space-between;margin:0}.vb-collage-group-label select{max-width:63%}.vb-collage-scientific{font-size:12px}.vb-collage-counter strong{font-size:clamp(54px,15vw,80px)}.vb-collage-hint{display:none}}
 @media(prefers-reduced-motion:reduce){.vb-collage-bird{animation:none;transition:none}}
 
+
+/* Vaste, witte website — geen tijdsafhankelijk thema */
+html,body,.shell,.main{background:#fff !important}
+/* Uitsluitend de collage, zonder kaarten, kopteksten, filters of voetnoten */
+.vb-collage{background:#fff;border:0;border-radius:0;padding:0;margin:0 0 22px;overflow:hidden;box-shadow:none;color:#4a2b33}
+.vb-collage-stage{background:#fff}
+.vb-collage-counter strong{font-size:clamp(45px,7vw,86px);color:#c25977}
+.vb-collage-counter span{color:#875469}
+@media(max-width:620px){.vb-collage{padding:0}.vb-collage-counter strong{font-size:clamp(43px,12vw,68px)}}
+/* Bewijsfoto's staan na de gewone fotoverzameling en de lijst zonder foto */
+.proof-photo-section{margin-top:40px;padding-top:22px;border-top:1px solid #eed8df}
+.proof-photo-section h2{display:flex;align-items:center;gap:12px}
+.proof-photo-count{font:600 12px Inter,system-ui,sans-serif;background:#f5e1e8;color:#7a3c4f;border-radius:30px;padding:6px 10px}
+.proof-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:14px;margin-top:18px;align-items:start}
+.proof-photo-grid .stamp-wrapper{margin:0;cursor:pointer;max-width:260px}
+.proof-photo-grid .stamp-card{padding:8px 8px 38px}
+.proof-photo-grid .stamp-name{height:38px;font-size:12px}
+.proof-photo-grid .stamp-badge{width:42px;height:42px;bottom:32px;right:5px}
+.proof-photo-option{display:flex;align-items:flex-start;gap:12px;margin:10px 0 4px;padding:12px 14px;border:1px solid #edd4dd;border-radius:12px;background:#fff;font-size:13px;cursor:pointer}
+.proof-photo-option input{width:18px;height:18px;accent-color:#c25977;margin:2px 0 0;flex-shrink:0}
+.proof-photo-option span{display:grid;gap:5px}
+.proof-photo-option small{font-size:12px;font-weight:400;color:#816b74;line-height:1.4}
+
 </style>
 </head>
 <body>
@@ -187,7 +203,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=33"></script>
+<script type="module" src="./app.js?v=34"></script>
 
 <!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
