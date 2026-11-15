@@ -75,7 +75,9 @@ function celebrateSeen(id){
 }
 
 // ============================================================================
-// STICKER COLLAGE LOGICA (Zoals Everybird)
+// STICKER COLLAGE LOGICA (EXACT ZOALS EVERYBIRD SITE)
+// Geen rotatie, geen negatieve marges, align-items: flex-end (bodem uitgelijnd).
+// Formaat per vogelgroep (simuleert lichaamsmassa).
 // ============================================================================
 const groupSizes = {
     "Zwanen en ganzen": 2.3,
@@ -115,12 +117,12 @@ if(!document.getElementById('collage-style')){
     const st = document.createElement('style');
     st.id = 'collage-style';
     st.innerHTML = `
-        .collage-container { display:flex; flex-wrap:wrap; justify-content:center; align-content:center; align-items:center; padding:40px 30px; background:linear-gradient(135deg, #ffffff, #fcf5f7); border-radius:22px; box-shadow:0 8px 24px rgba(194,89,119,0.08); border:1px solid #f2e1e6; margin-bottom:29px; position:relative; overflow:hidden; min-height: 200px; }
-        .collage-item { position:relative; cursor:pointer; transition:all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); filter:drop-shadow(0 4px 6px rgba(0,0,0,0.15)); display:flex; align-items:center; justify-content:center; }
-        .collage-item:hover { transform: scale(1.3) rotate(0deg) !important; z-index:999 !important; filter:drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
+        .collage-container { display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:6px; padding:40px 30px; background:#ffffff; border-radius:22px; border:1px solid #f2e1e6; margin-bottom:29px; position:relative; min-height: 200px; }
+        .collage-item { position:relative; cursor:pointer; transition:transform 0.2s ease-out; display:flex; align-items:center; justify-content:center; }
+        .collage-item:hover { transform: scale(1.2); z-index:10; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.15)); }
         .collage-item .bird-sticker { width:100%; height:100%; object-fit:contain; }
         .collage-item .sticker-fallback { width:100%; height:100%; }
-        .collage-badge { position:absolute; bottom:12px; right:18px; font-size:11px; color:#a3425e; font-weight:800; background:rgba(255,255,255,0.9); padding:4px 8px; border-radius:12px; pointer-events:none; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f2e1e6; }
+        .collage-badge { position:absolute; top:12px; left:18px; font-size:11px; color:#a3425e; font-weight:800; background:rgba(255,255,255,0.9); padding:4px 8px; border-radius:12px; pointer-events:none; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f2e1e6; }
     `;
     document.head.appendChild(st);
 }
@@ -131,23 +133,23 @@ function generateCollage() {
         return `<div class="hero"><div><div class="eyebrow">JOUW COLLAGE</div><h2>Nog geen vogels</h2><p>Voeg je eerste vogel toe op het tabblad Vogels om hier een sticker-collage te bouwen!</p><button class="button" style="margin-top:18px;background:white;color:black" data-page="vogels">Bekijk alle vogels →</button></div></div>`;
     }
 
-    let shuffled = [...seenSpecies].sort(() => 0.5 - Math.random());
-    let stickersHtml = shuffled.map(s => {
+    // Everybird sorteert de collage standaard taxonomisch, we houden de vogels dus geordend (niet random)
+    let sorted = [...seenSpecies].sort((a,b) => a.idx - b.idx);
+    
+    let stickersHtml = sorted.map(s => {
         const scale = groupSizes[s.group] || 1.0;
-        const baseSize = window.innerWidth > 600 ? 75 : 55;
+        const baseSize = window.innerWidth > 600 ? 55 : 40; 
         const w = Math.round(baseSize * scale);
-        const rot = (Math.random() * 40) - 20; 
-        const z = Math.round(100 - (scale * 10)); 
-        const m = Math.round(w * -0.22); 
         
-        return `<div class="collage-item" data-edit="${esc(s.id)}" title="${esc(s.name)}" style="width:${w}px; height:${w}px; margin:${m}px; transform: rotate(${rot}deg); z-index:${z};">
+        // Exact zoals de site: geen margin overlap, geen rotatie (straight!)
+        return `<div class="collage-item" data-edit="${esc(s.id)}" title="${esc(s.name)}" style="width:${w}px; height:${w}px;">
             ${birdSticker(s, w, '')}
         </div>`;
     }).join('');
 
     return `<div class="collage-container">
-        ${stickersHtml}
         <div class="collage-badge">${seenSpecies.length} SOORTEN</div>
+        ${stickersHtml}
     </div>`;
 }
 // ============================================================================
