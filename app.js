@@ -1,6 +1,6 @@
 import {KLEUREN, KLEUR_HEX, kleurenVoor, ingedeeldAantal} from './kleuren.js?v=1';
 import {seed} from './species.js?v=22';
-import {loadStickerIndex, stickerMatch, stickerCandidates, stickerDiagnostics} from './stickers.js?v=11';
+import {loadStickerIndex, stickerMatch, stickerCandidates, stickerDiagnostics} from './stickers.js?v=13';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 // ============================================================================
@@ -13,15 +13,8 @@ const DEFAULT_SUPABASE_KEY = 'sb_publishable_eWyAc7GqPMxz9LKKl3b-JA_kjoCdhEa';
 const validPages=['dashboard','vogels','fotos','ontdekken','statistieken','instellingen'];
 const rarityOrder=['Algemeen','Schaars','Zeldzaam','Dwaalgast'];
 
-const fallbackAlgemeen=new Set(["Knobbelzwaan","Rotgans","Brandgans","Grauwe Gans","Toendrarietgans","Kleine Rietgans","Kolgans","Eider","Zwarte Zee-eend","Brilduiker","Nonnetje","Grote Zaagbek","Middelste Zaagbek","Bergeend","Krooneend","Tafeleend","Kuifeend","Zomertaling","Slobeend","Krakeend","Smient","Wilde Eend","Pijlstaart","Wintertaling","Dodaars","Fuut","Geoorde Fuut","Holenduif","Houtduif","Turkse Tortel","Gierzwaluw","Koekoek","Waterral","Waterhoen","Meerkoet","Ooievaar","Blauwe Reiger","Grote Zilverreiger","Kleine Zilverreiger","Lepelaar","Jan-van-gent","Aalscholver","Scholekster","Kluut","Zilverplevier","Goudplevier","Bontbekplevier","Kleine Plevier","Kievit","Regenwulp","Wulp","Grutto","Rosse Grutto","Oeverloper","Witgat","Zwarte Ruiter","Groenpootruiter","Bosruiter","Tureluur","Houtsnip","Watersnip","Steenloper","Kanoet","Kemphaan","Krombekstrandloper","Drieteenstrandloper","Bonte Strandloper","Kleine Strandloper","Drieteenmeeuw","Kokmeeuw","Dwergmeeuw","Zwartkopmeeuw","Stormmeeuw","Kleine Mantelmeeuw","Zilvermeeuw","Geelpootmeeuw","Pontische Meeuw","Grote Mantelmeeuw","Dwergstern","Zwarte Stern","Visdief","Noordse Stern","Grote Stern","Wespendief","Bruine Kiekendief","Blauwe Kiekendief","Sperwer","Havik","Zeearend","Buizerd","Kerkuil","Steenuil","Ransuil","Bosuil","IJsvogel","Groene Specht","Zwarte Specht","Middelste Bonte Specht","Grote Bonte Specht","Kleine Bonte Specht","Torenvalk","Boomvalk","Slechtvalk","Wielewaal","Grauwe Klauwier","Ekster","Gaai","Kauw","Roek","Zwarte Kraai","Raaf","Goudhaan","Vuurgoudhaan","Pimpelmees","Koolmees","Kuifmees","Zwarte Mees","Matkop","Glanskop","Baardman","Staartmees","Boomleeuwerik","Veldleeuwerik","Oeverzwaluw","Boerenzwaluw","Huiszwaluw","Cetti's Zanger","Bladkoning","Fluiter","Tjiftjaf","Fitis","Zwartkop","Tuinfluiter","Braamsluiper","Grasmus","Sprinkhaanzanger","Snor","Spotvogel","Bosrietzanger","Kleine Karekiet","Rietzanger","Boomklever","Boomkruiper","Winterkoning","Spreeuw","Beflijster","Merel","Kramsvogel","Zanglijster","Koperwiek","Grote Lijster","Grauwe Vliegenvanger","Roodborst","Nachtegaal","Blauwborst","Bonte Vliegenvanger","Zwarte Roodstaart","Gekraagde Roodstaart","Paapje","Roodborsttapuit","Tapuit","Heggenmus","Huismus","Ringmus","Engelse Kwikstaart","Gele Kwikstaart","Noordse Kwikstaart","Grote Gele Kwikstaart","Witte Kwikstaart","Rouwkwikstaart","Boompieper","Graspieper","Oeverpieper","Waterpieper","Keep","Vink","Appelvink","Goudvink","Groenling","Kneu","Frater","Kleine Barmsijs","Grote Barmsijs","Kruisbek","Putter","Europese Kanarie","Sijs","Sneeuwgors","Geelgors","Rietgors","Grote Canadese Gans","Nijlgans","Fazant","Rotsduif","Halsbandparkiet"]);
-const fallbackSchaars=new Set(["Kleine Zwaan","Wilde Zwaan","Witbuikrotgans","Zwarte Rotgans","Roodhalsgans","Taigarietgans","Dwerggans","IJseend","Grote Zee-eend","Casarca","Witoogeend","Topper","Kwartel","Patrijs","Flamingo","Roodhalsfuut","Kuifduiker","Zomertortel","Nachtzwaluw","Porseleinhoen","Kraanvogel","Roodkeelduiker","Parelduiker","IJsduiker","Noordse Stormvogel","Grauwe Pijlstormvogel","Noordse Pijlstormvogel","Zwarte Ooievaar","Roerdomp","Woudaap","Kwak","Koereiger","Purperreiger","Zwarte Ibis","Steltkluut","Morinelplevier","Strandplevier","Poelruiter","Bokje","Temmincks Strandloper","Paarse Strandloper","Blonde Ruiter","Gestreepte Strandloper","Grauwe Franjepoot","Rosse Franjepoot","Alk","Zeekoet","Kleinste Jager","Kleine Jager","Middelste Jager","Grote Jager","Kleine Burgemeester","Grote Burgemeester","Lachstern","Reuzenstern","Witwangstern","Witvleugelstern","Visarend","Rode Wouw","Zwarte Wouw","Ruigpootbuizerd","Velduil","Oehoe","Hop","Bijeneter","Draaihals","Roodpootvalk","Smelleken","Klapekster","Bonte Kraai","Buidelmees","Strandleeuwerik","Roodstuitzwaluw","Pallas' Boszanger","Humes Bladkoning","Siberische Tjiftjaf","Waterrietzanger","Grote Karekiet","Graszanger","Pestvogel","Kleine Vliegenvanger","Grote Pieper","Duinpieper","Roodkeelpieper","Roodmus","Grote Kruisbek","IJsgors","Ortolaan","Grauwe Gors","Zwarte Zwaan","Indische Gans","Mandarijneend","Chileense Flamingo","Grote Alexanderparkiet"]);
-const fallbackZeldzaam=new Set(["Kleine Canadese Gans","Sneeuwgans","Ross' Gans","Koningseider","Stellers Eider","Brilzee-eend","Amerikaanse Zee-eend","Ringsnaveleend","Kleine Topper","Blauwvleugeltaling","Amerikaanse Smient","Amerikaanse Wintertaling","Korhoen","Oosterse Tortel","Alpengierzwaluw","Vale Gierzwaluw","Kwartelkoning","Klein Waterhoen","Kleinst Waterhoen","Geelsnavelduiker","Stormvogeltje","Vaal Stormvogeltje","Kuhls Pijlstormvogel","Grote Pijlstormvogel","Vale Pijlstormvogel","Ralreiger","Kuifaalscholver","Dwergaalscholver","Griel","Amerikaanse Goudplevier","Aziatische Goudplevier","Steppekievit","Witstaartkievit","Terekruiter","Kleine Geelpootruiter","Grote Grijze Snip","Poelsnip","Vorkstaartplevier","Steppevorkstaartplevier","Breedbekstrandloper","Bairds Strandloper","Bonapartes Strandloper","Grote Franjepoot","Papegaaiduiker","Zwarte Zeekoet","Kleine Alk","Vorkstaartmeeuw","Kleine Kokmeeuw","Lachmeeuw","Franklins Meeuw","Ringsnavelmeeuw","Dougalls Stern","Grijze Wouw","Slangenarend","Vale Gier","Monniksgier","Schreeuwarend","Bastaardarend","Dwergarend","Steenarend","Steppekiekendief","Grauwe Kiekendief","Arendbuizerd","Ruigpootuil","Dwergooruil","Sneeuwuil","Scharrelaar","Grijskopspecht","Kleine Torenvalk","Eleonora's Valk","Giervalk","Roodoogvireo","Bruine Klauwier","Turkestaanse Klauwier","Daurische Klauwier","Kleine Klapekster","Roodkopklauwier","Notenkraker","Kuifleeuwerik","Kortteenleeuwerik","Rotszwaluw","Grauwe Fitis","Noordse Boszanger","Raddes Boszanger","Bruine Boszanger","Bergfluiter","Balkanbergfluiter","Iberische Tjiftjaf","Sperwergrasmus","Westelijke Baardgrasmus","Balkanbaardgrasmus","Provençaalse Grasmus","Kleine Sprinkhaanzanger","Siberische Sprinkhaanzanger","Krekelzanger","Kleine Spotvogel","Oostelijke Vale Spotvogel","Orpheusspotvogel","Veldrietzanger","Struikrietzanger","Zwartkoprietzanger","Rotskruiper","Taigaboomkruiper","Roze Spreeuw","Waterspreeuw","Goudlijster","Siberische Lijster","Vale Lijster","Bruine Lijster","Zwartkeellijster","Noordse Nachtegaal","Roodkeelnachtegaal","Blauwstaart","Withalsvliegenvanger","Izabeltapuit","Woestijntapuit","Bonte Tapuit","Alpenheggenmus","Balkankwikstaart","Citroenkwikstaart","Mongoolse Pieper","Siberische Boompieper","Petsjorapieper","Siberische Waterpieper","Haakbek","Woestijnvink","Witstuitbarmsijs","Witbandkruisbek","Zwartkopgors","Cirlgors","Witkopgors","Wilgengors","Dwerggors","Bosgors","Noordse Waterlijster","Zwartkopzanger","Mirtezanger","Rosse Stekelstaart","Kleinste Canadese Gans","Heilige Ibis","Monniksparkiet","Huiskraai","Bruinkopdiksnavelmees"]);
-
 function getRarity(s){
     if(s.rarity && rarityOrder.includes(s.rarity)) return s.rarity;
-    if(fallbackAlgemeen.has(s.name)) return 'Algemeen';
-    if(fallbackSchaars.has(s.name)) return 'Schaars';
-    if(fallbackZeldzaam.has(s.name)) return 'Zeldzaam';
     return 'Dwaalgast';
 }
 
@@ -69,13 +62,6 @@ function getHashPage(){
     return validPages.includes(h)?h:'dashboard';
 }
 
-function getHeroTimeProps() {
-    const h = new Date().getHours();
-    if(h >= 5 && h < 11) return {class:'morning', eye:'VROEGE VOGEL', title:'De natuur ontwaakt', emoji:'🌅'};
-    if(h >= 18 || h < 5) return {class:'night', eye:'NACHTUIL', title:'Tijd voor uilen en nachtzwaluwen', emoji:'🌙'};
-    return {class:'', eye:'JOUW LEVENSLIJST', title:'Houd je waarnemingen bij', emoji:'🔭'};
-}
-
 // Een korte pop-animatie op de sticker van de net aangevinkte soort.
 function celebrateSeen(id){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -89,6 +75,87 @@ function celebrateSeen(id){
         card.addEventListener('animationend',()=>card.classList.remove('sticker-celebrate'),{once:true});
     }
 }
+
+// ============================================================================
+// STICKER COLLAGE LOGICA (Zoals Everybird)
+// ============================================================================
+const groupSizes = {
+    "Zwanen en ganzen": 2.3,
+    "Ooievaars, pelikanen, reigers en lepelaars": 2.1,
+    "Roofvogels": 1.9,
+    "Futen en flamingo's": 1.8,
+    "Genten en aalscholvers": 1.8,
+    "Eenden en zaagbekken": 1.6,
+    "Meeuwen": 1.5,
+    "Uilen": 1.5,
+    "Rallen, kraanvogels en trappen": 1.4,
+    "Kraaiachtigen": 1.3,
+    "Duikers en stormvogels": 1.3,
+    "Wulpen, ruiters en snippen": 1.2,
+    "Valken": 1.2,
+    "Duiven en zandhoenders": 1.1,
+    "Hoenderachtigen": 1.1,
+    "Plevieren, kluten en kieviten": 1.0,
+    "Sterns": 1.0,
+    "Alkachtigen en jagers": 1.0,
+    "Lijsters, spreeuwen en boomklevers": 0.9,
+    "Hop, ijsvogels en spechten": 0.9,
+    "Klauwieren en wielewaal": 0.9,
+    "Gevestigde exoten": 0.9,
+    "Vinken": 0.8,
+    "Gorzen en Amerikaanse zangers": 0.8,
+    "Mussen, heggenmussen, kwikstaarten en piepers": 0.8,
+    "Leeuweriken en zwaluwen": 0.8,
+    "Nachtzwaluwen, gierzwaluwen en koekoeken": 0.8,
+    "Zangers": 0.7,
+    "Vliegenvangers, roodstaarten en tapuiten": 0.7,
+    "Mezen en goudhaantjes": 0.6
+};
+
+// CSS dynamisch inladen voor de perfecte sticker-look
+if(!document.getElementById('collage-style')){
+    const st = document.createElement('style');
+    st.id = 'collage-style';
+    st.innerHTML = `
+        .collage-container { display:flex; flex-wrap:wrap; justify-content:center; align-content:center; align-items:center; padding:40px 30px; background:linear-gradient(135deg, #ffffff, #fcf5f7); border-radius:22px; box-shadow:0 8px 24px rgba(194,89,119,0.08); border:1px solid #f2e1e6; margin-bottom:29px; position:relative; overflow:hidden; min-height: 200px; }
+        .collage-item { position:relative; cursor:pointer; transition:all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); filter:drop-shadow(0 4px 6px rgba(0,0,0,0.15)); display:flex; align-items:center; justify-content:center; }
+        .collage-item:hover { transform: scale(1.3) rotate(0deg) !important; z-index:999 !important; filter:drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
+        .collage-item .bird-sticker { width:100%; height:100%; object-fit:contain; }
+        .collage-item .sticker-fallback { width:100%; height:100%; }
+        .collage-badge { position:absolute; bottom:12px; right:18px; font-size:11px; color:#a3425e; font-weight:800; background:rgba(255,255,255,0.9); padding:4px 8px; border-radius:12px; pointer-events:none; box-shadow:0 2px 8px rgba(0,0,0,0.05); border:1px solid #f2e1e6; }
+    `;
+    document.head.appendChild(st);
+}
+
+function generateCollage() {
+    const seenSpecies = species.filter(s => entries[s.id]?.seen);
+    if(seenSpecies.length === 0) {
+        return `<div class="hero"><div><div class="eyebrow">JOUW COLLAGE</div><h2>Nog geen vogels</h2><p>Voeg je eerste vogel toe op het tabblad Vogels om hier een sticker-collage te bouwen!</p><button class="button" style="margin-top:18px;background:white;color:black" data-page="vogels">Bekijk alle vogels →</button></div></div>`;
+    }
+
+    // Hussel de lijst zodat de collage er steeds uniek en rommelig uitziet
+    let shuffled = [...seenSpecies].sort(() => 0.5 - Math.random());
+    
+    let stickersHtml = shuffled.map(s => {
+        const scale = groupSizes[s.group] || 1.0;
+        const baseSize = window.innerWidth > 600 ? 75 : 55;
+        const w = Math.round(baseSize * scale);
+        const rot = (Math.random() * 40) - 20; // Roteer tussen -20 en +20 graden
+        const z = Math.round(100 - (scale * 10)); // Hoe kleiner de vogel, hoe hoger de z-index (bovenop)
+        const m = Math.round(w * -0.22); // Negatieve marge om ze als echte stickers te overlappen!
+        
+        return `<div class="collage-item" data-edit="${esc(s.id)}" title="${esc(s.name)}" style="width:${w}px; height:${w}px; margin:${m}px; transform: rotate(${rot}deg); z-index:${z};">
+            ${birdSticker(s, w, '')}
+        </div>`;
+    }).join('');
+
+    return `<div class="collage-container">
+        ${stickersHtml}
+        <div class="collage-badge">${seenSpecies.length} SOORTEN</div>
+    </div>`;
+}
+
+// ============================================================================
 
 let page=getHashPage(),term='',group='Alle groepen',rarity='Alle zeldzaamheden',filter='alle',sortBy='standaard',kleurFilter='Alle kleuren',modal=null, busy=false, message='',msgType='notice';
 let species=seed.map((s,idx)=>({...s, idx, rarity:getRarity(s)}));
@@ -175,11 +242,8 @@ function birdSticker(s, size=52, cls=''){
     const matches=stickerCandidates(s.scientific,s.name);
     if(!matches.length)return groupIcon(s.group,size);
     const urls=matches.map(x=>x.url);
-    // Elke afbeelding probeert achtereenvolgens het exacte indexpad via
-    // jsDelivr en via GitHub. Bij ondersoorten wordt eerst het vormbestand
-    // geprobeerd. Geen onjuiste lookalike-stickers.
     const alt=`AI-sticker van ${s.name}`;
-    return `<img class="bird-sticker ${cls}" src="${esc(urls[0])}" data-sticker-urls="${esc(JSON.stringify(urls))}" data-sticker-index="0" data-sticker-name="${esc(s.name)}" alt="${esc(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`+
+    return `<img class="bird-sticker ${cls}" src="${esc(urls[0])}" data-sticker-urls="${esc(JSON.stringify(urls))}" data-sticker-index="0" data-sticker-name="${esc(s.name)}" alt="${esc(alt)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
       `<span class="sticker-fallback" style="display:none;align-items:center;justify-content:center">${groupIcon(s.group,size)}</span>`;
 }
 
@@ -215,10 +279,9 @@ function stat(label,value){return `<div class="stat"><span>${label}</span><b>${v
 function dashboard(){
     const seen=countSeen(),photos=countPhoto();
     const recent=species.filter(s=>entries[s.id]?.seen).slice(-5);
-    const tp = getHeroTimeProps();
     
     return `<div class="top"><div><div class="eyebrow">Mijn persoonlijke natuurdagboek</div><h1>Welkom in je vogelboek</h1><div class="muted">Overzicht van al je waarnemingen en foto's.</div></div></div>
-<div class="hero ${tp.class}"><div><div class="eyebrow" style="color:rgba(255,255,255,0.7)">${tp.eye}</div><h2>${tp.title}</h2><p>Vink je soorten af, voeg je eigen foto's toe en bekijk welke vogels je nog kunt ontdekken.</p><button class="button" style="margin-top:18px;background:white;color:black" data-page="vogels">Bekijk alle vogels →</button></div><div style="font-size:75px">${tp.emoji}</div></div>
+${generateCollage()}
 <div class="stats">${stat('Soorten gezien',seen)}${stat("Met eigen foto",photos)}${stat('Nog zonder foto',seen-photos)}${stat('Dit jaar',Object.values(entries).filter(e=>e.seen&&e.date?.startsWith(new Date().getFullYear().toString())).length)}</div>
 <div class="layout"><section class="panel"><div class="panel-header"><h2>Jouw waarnemingen</h2><button class="link" data-page="vogels">Alle vogels →</button></div>${recent.length?recent.map(s=>rowitem(s)).join(''):'<div class="empty">Nog geen waarnemingen.</div>'}</section><section class="panel"><h2>Op zoek naar...</h2><p class="sectionlead">Je eigen ontdek-lijst: soorten die je nog wilt zien en gefotografeerde soorten die ontbreken.</p><button class="button" data-page="ontdekken">Bekijk je zoeklijst</button></section></div>`;
 }
@@ -324,6 +387,8 @@ window.addEventListener('hashchange',()=>{
         window.scrollTo(0,0);
     }
 });
+
+window.addEventListener('resize', () => { if(page === 'dashboard') render(); });
 
 document.addEventListener('click',async ev=>{let t=ev.target.closest('[data-page],[data-edit],[data-toggle],#close,#delete,#logout,#export,#dismiss');if(!t)return;if(t.dataset.page){const target=t.dataset.page;if(location.hash==='#'+target){page=target;modal=null;render();window.scrollTo(0,0)}else{location.hash=target}}else if(t.dataset.edit){modal=t.dataset.edit;render()}else if(t.dataset.toggle){const id=t.dataset.toggle;try{let wasSeen = entries[id]?.seen; if(wasSeen){await removeEntry(id)}else{await persist(id,{seen:true,date:'',location:''});}render();if(!wasSeen)celebrateSeen(id)}catch(e){notify(e.message,'error')}}else if(t.id==='close'){modal=null;render()}else if(t.id==='dismiss'){message='';render()}else if(t.id==='delete'){if(!confirm('Wil je deze waarneming verwijderen?'))return;try{await removeEntry(modal);modal=null;render()}catch(e){notify(e.message,'error')}}else if(t.id==='logout'){await supabase.auth.signOut();session=null;canEdit=false;await fetchCloud();render()}else if(t.id==='export'){const payload=JSON.stringify({version:1,species,entries},null,2);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([payload],{type:'application/json'}));a.download='mijn-vogelboek-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}});
 document.addEventListener('input',e=>{if(e.target.id==='search'){let pos=e.target.selectionStart;term=e.target.value;render();const el=$('#search');el.focus();el.setSelectionRange(pos,pos)}});
