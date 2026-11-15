@@ -1,0 +1,23 @@
+name: Verifieer alle vogelstickers bij de bron
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Haal de officiële Git-bestandslijst en metadata op
+        run: git clone --depth 1 --filter=blob:none --no-checkout https://github.com/alchaincyf/huashu-bird-sticker.git /tmp/huashu-source
+      - name: Zoek alleen echte, exacte stickerbestanden
+        run: python3 tools/build_exact_sticker_manifest.py
+      - name: Publiceer controle en bestandskoppelingen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sticker-verified.json sticker-bronrapport.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Controleer stickerbestanden aan de bron"
+            git push
+          fi
