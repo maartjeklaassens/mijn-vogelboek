@@ -62,14 +62,12 @@ function getHashPage(){
     return validPages.includes(h)?h:'dashboard';
 }
 
-// Een korte pop-animatie op de sticker van de net aangevinkte soort.
 function celebrateSeen(id){
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const card=[...document.querySelectorAll('[data-species-card]')]
         .find(el=>el.dataset.speciesCard===String(id));
     if(card){
         card.classList.remove('sticker-celebrate');
-        // Restart als de gebruiker snel opnieuw een vogel toevoegt.
         void card.offsetWidth;
         card.classList.add('sticker-celebrate');
         card.addEventListener('animationend',()=>card.classList.remove('sticker-celebrate'),{once:true});
@@ -102,6 +100,7 @@ const groupSizes = {
     "Hop, ijsvogels en spechten": 0.9,
     "Klauwieren en wielewaal": 0.9,
     "Gevestigde exoten": 0.9,
+    "Strandlopers en franjepoten": 0.9,
     "Vinken": 0.8,
     "Gorzen en Amerikaanse zangers": 0.8,
     "Mussen, heggenmussen, kwikstaarten en piepers": 0.8,
@@ -112,7 +111,6 @@ const groupSizes = {
     "Mezen en goudhaantjes": 0.6
 };
 
-// CSS dynamisch inladen voor de perfecte sticker-look
 if(!document.getElementById('collage-style')){
     const st = document.createElement('style');
     st.id = 'collage-style';
@@ -133,16 +131,14 @@ function generateCollage() {
         return `<div class="hero"><div><div class="eyebrow">JOUW COLLAGE</div><h2>Nog geen vogels</h2><p>Voeg je eerste vogel toe op het tabblad Vogels om hier een sticker-collage te bouwen!</p><button class="button" style="margin-top:18px;background:white;color:black" data-page="vogels">Bekijk alle vogels →</button></div></div>`;
     }
 
-    // Hussel de lijst zodat de collage er steeds uniek en rommelig uitziet
     let shuffled = [...seenSpecies].sort(() => 0.5 - Math.random());
-    
     let stickersHtml = shuffled.map(s => {
         const scale = groupSizes[s.group] || 1.0;
         const baseSize = window.innerWidth > 600 ? 75 : 55;
         const w = Math.round(baseSize * scale);
-        const rot = (Math.random() * 40) - 20; // Roteer tussen -20 en +20 graden
-        const z = Math.round(100 - (scale * 10)); // Hoe kleiner de vogel, hoe hoger de z-index (bovenop)
-        const m = Math.round(w * -0.22); // Negatieve marge om ze als echte stickers te overlappen!
+        const rot = (Math.random() * 40) - 20; 
+        const z = Math.round(100 - (scale * 10)); 
+        const m = Math.round(w * -0.22); 
         
         return `<div class="collage-item" data-edit="${esc(s.id)}" title="${esc(s.name)}" style="width:${w}px; height:${w}px; margin:${m}px; transform: rotate(${rot}deg); z-index:${z};">
             ${birdSticker(s, w, '')}
@@ -154,7 +150,6 @@ function generateCollage() {
         <div class="collage-badge">${seenSpecies.length} SOORTEN</div>
     </div>`;
 }
-
 // ============================================================================
 
 let page=getHashPage(),term='',group='Alle groepen',rarity='Alle zeldzaamheden',filter='alle',sortBy='standaard',kleurFilter='Alle kleuren',modal=null, busy=false, message='',msgType='notice';
@@ -395,13 +390,11 @@ document.addEventListener('input',e=>{if(e.target.id==='search'){let pos=e.targe
 document.addEventListener('change',async e=>{if(e.target.id==='group'){group=e.target.value;render()}else if(e.target.id==='rarity'){rarity=e.target.value;render()}else if(e.target.id==='filter'){filter=e.target.value;render()}else if(e.target.id==='sort'){sortBy=e.target.value;render()}else if(e.target.id==='kleur'){kleurFilter=e.target.value;render()}else if(e.target.id==='seen'){$('#obsfields').style.opacity=e.target.checked?'1':'.45'}});
 document.addEventListener('submit',async ev=>{if(ev.target.id==='obsform'){ev.preventDefault();const f=ev.target;if(busy)return;busy=true;try{let justSeen = false; if(!f.elements.seen.checked){await removeEntry(modal)}else{const old=entries[modal]||{}; if(!old.seen) justSeen=true; await persist(modal,{...old,seen:true,date:f.elements.date.value,location:f.elements.location.value},f.elements.photo.files[0]);if(cloud){delete photoCache[modal];if(entries[modal].photoPath)photoCache[modal]=await photoUrl(modal)}}const savedSpeciesId=modal;modal=null;notify('Waarneming opgeslagen.','success'); if(justSeen) celebrateSeen(savedSpeciesId);}catch(e){notify('Opslaan mislukt: '+e.message,'error')}finally{busy=false}}else if(ev.target.id==='loginform'){ev.preventDefault();const f=ev.target;const email=f.elements.email.value,password=f.elements.password.value;try{const result=await supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;notify('Je bent ingelogd als eigenaar.','success')}catch(e){notify(e.message,'error')}}});
 initCloud();
-// Stickers zijn decoratief: een netwerkfout mag het vogelboek nooit blokkeren.
+
 loadStickerIndex().then(()=>{const r=stickerDiagnostics(species);console.info('Stickerkandidaten:',r.candidates,'/',r.total,'; zonder match:',r.unresolved.length);render();}).catch(err=>console.warn('Stickerindex niet beschikbaar:',err));
 
 window.addEventListener('vogelboek-stickers-updated', () => render());
 
-// Vervang een mislukte sticker-URL door de volgende geldige kandidaat.
-// Voorkomt dat een CDN-storing eerder werkende vogels laat verdwijnen.
 document.addEventListener('error', event => {
   const img=event.target;
   if(!(img instanceof HTMLImageElement)||!img.dataset.stickerUrls)return;
@@ -414,7 +407,6 @@ document.addEventListener('error', event => {
   if(img.nextElementSibling)img.nextElementSibling.style.display='flex';
 },true);
 
-// Diagnostiek kan zonder eigen waarnemingen/foto's worden gedownload.
 window.vogelboekStickerRapport=()=>{
   const report=stickerDiagnostics(species);
   const body=JSON.stringify(report,null,2);
