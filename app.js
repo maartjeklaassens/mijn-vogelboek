@@ -1,5 +1,5 @@
 import {seed} from './species.js?v=22';
-import {collagePanelHtml, mountCollage} from './collage.js?v=2';
+import {collagePanelHtml, mountCollage} from './collage.js?v=2'; 
 import {loadStickerIndex, stickerMatch, stickerCandidates, stickerDiagnostics} from './stickers.js?v=12';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
