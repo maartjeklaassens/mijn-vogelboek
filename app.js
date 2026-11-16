@@ -36,7 +36,7 @@ const groupPaths = {
     "Duikers en stormvogels": `<path d="M17.8 9.5c-1.6 0-2.8 1.2-2.8 2.8 0 .7.2 1.3.6 1.8-3.4-.2-7.8.6-10.8 2.5L2.5 16l-.5 2.8c2 1.6 5.6 2.4 10.2 2.4h6.2c2.6 0 4.4-1.1 4.4-2.8 0-1.3-.9-2.3-2.4-2.7.5-.6.8-1.4.8-2.3 0-1.6-1.4-2.9-3.4-2.9zm3.4 1.2l3.3.7-3.3.8v-1.5z"/>`,
     "Ooievaars, pelikanen, reigers en lepelaars": `<path d="M18.2 3.8c-1.3 0-2.4 1-2.4 2.3 0 2.2-1.4 4.8-2.6 6.4-2.6 0-5.4 1.2-7.4 3.4l-1.8 2.1h7.8v5.5h1.5V18h2v5.5h1.5V17.8c2-.6 3.4-2 3.4-3.8 0-1.3-.7-2.4-1.8-3.1 1-1.5 1.8-3.6 1.8-5.2 0-1.1-.9-1.9-2-1.9zm2 1l3.6.7-3.6.8V4.8z"/>`,
     "Genten en aalscholvers": `<path d="M17.5 5.2c-1.5 0-2.6 1.2-2.6 2.7 0 1.8-.5 3.8-1.4 5-2.6.4-5.2 2-7.2 4.6L4 20.5l2.2.8 2.4-1.6c1.4.6 2.9.9 4.4.9 3.6 0 6.2-2.2 6.2-5.4 0-1.6-.6-3-1.7-4 .7-1.1 1.1-2.5 1.1-3.8 0-1.3-1.1-2.2-2.1-2.2zm2.1 1.1l3.2.6-1.2 1.2-2-.6V6.3z"/>`,
-    "Plevieren, kluten en kieviten": `<path d="M17.2 7.8c-1.5 0-2.7 1.2-2.7 2.7 0 .6.2 1.2.5 1.7-2.8.2-5.8 1.5-8 3.8l-3 1.8.8 1.3 3.2-.8c1.4.7 3 1.1 4.8 1.1 3.8 0 6.4-2 6.4-4.8 0-1.2-.5-2.3-1.3-3.1.5-.5.8-1.2.8-2 0-1.5-1.1-2.7-2.5-2.7zm2.5 1.3l2.5.6-2.5.7V9.1zM11 19.4v4.1h1.5v-4.1H11zm3 0v4.1h1.5v-4.1H14z"/>`,
+    "Plevieren, kluten en kieviten": `<path d="M17.2 7.8c-1.5 0-2.7 1.2-2.7 2.7 0 .6.2 1.2.5 1.7-2.8.2-5.8 1.5-8 3.8l-3 1.8.8 1.3 3.2-.8c1.4.7 3 1.1 4.8 1.1 3.8 0 6.4-2 6.4-4.8 0-1.2-.5-2.3-1.3-3.1.5-.5.8-1.2.8-2 0-1.5-1-2.7-2.5-2.7zm2.5 1.3l2.5.6-2.5.7V9.1zM11 19.4v4.1h1.5v-4.1H11zm3 0v4.1h1.5v-4.1H14z"/>`,
     "Wulpen, ruiters en snippen": `<path d="M16.5 7.5c-1.5 0-2.6 1.1-2.6 2.6 0 .6.2 1.2.5 1.6-2.8.2-5.8 1.5-8 3.9l-2.9 1.9.8 1.2 3.1-.8c1.4.7 3 1.1 4.8 1.1 3.6 0 6.1-1.9 6.1-4.6 0-1.2-.5-2.2-1.3-3 .5-.5.8-1.1.8-1.9 0-1.4-1-2.5-2.3-2.5zm2.2 1.2c2.2.2 4.1 1.4 4.8 3.4l-1.1.5c-.7-1.4-2-2.3-3.7-2.6V8.7zM10.8 19v4.5h1.4V19h-1.4zm2.8 0v4.5H15V19h-1.4z"/>`,
     "Strandlopers en franjepoten": `<path d="M16.8 8.8c-1.4 0-2.5 1.1-2.5 2.5 0 .6.2 1.1.5 1.5-2.6.2-5.4 1.3-7.4 3.4l-2.9 1.6.7 1.2 2.9-.7c1.3.6 2.8 1 4.4 1 3.4 0 5.8-1.8 5.8-4.3 0-1.1-.4-2-1.2-2.7.5-.4.7-1.1.7-1.8 0-1.3-1-2.4-2-2.4zm2 1.1l2.8.6-2.8.6V9.9zM11 19.3v3.7h1.4v-3.7H11zm2.8 0v3.7h1.4v-3.7h-1.4z"/>`,
     "Alkachtigen en jagers": `<path d="M15.5 5c-2.2 0-3.8 1.6-3.8 3.8 0 1.2.4 2.2 1 3-2.2 1.5-3.7 4-3.7 6.8 0 1.6.8 2.8 2.2 3.4h5.6c2.2 0 3.7-1.6 3.7-4.2 0-3.2-1.4-6-3.4-7.4.6-.7 1-1.6 1-2.6C18.1 6.2 17 5 15.5 5zm2.6 1.8c1.8.2 3.2 1.2 3.4 2.6-.9.6-2.1.9-3.4.9V6.8z"/>`,
@@ -186,11 +186,11 @@ function cardStickerOverlay(s, size=68){
 function countSeen(){return Object.keys(entries).filter(k=>entries[k]?.seen).length}
 function countPhoto(){return Object.values(entries).filter(x=>x.seen&&(x.photo||x.photoPath)).length}
 
-const iconHome = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`;
-const iconBird = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></svg>`;
-const iconCam = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
-const iconSearch = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`;
-const iconChart = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>`;
+const iconHome = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`;
+const iconBird = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12a8 8 0 0 0 8 8V7a4 4 0 0 0-7.28-2.3L2 20h3.41s1.37-3 4.37-3c3 0 4.37 3 4.37 3H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20h14.5l3.5-3.5zm-2 16v3h1.5v-3zm4-1v3.5h1.5V17zm-4.5-8.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>`;
+const iconCam = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 9.5 12 9.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5zm7-11.5h-2.5L15 3H9L7.5 5H5c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>`;
+const iconSearch = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l4.25 4.25a1 1 0 001.41-1.41l-4.25-4.25zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
+const iconChart = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="17" y="14" width="4" height="7" rx="1"/></svg>`;
 const iconGear = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
 const tabs=[
@@ -273,12 +273,10 @@ function fotos(){
     const mooi=allPhotos.filter(s=>!entries[s.id]?.proofPhoto);
     const bewijs=allPhotos.filter(s=>entries[s.id]?.proofPhoto);
     const missing=species.filter(s=>entries[s.id]?.seen&&!hasPhoto(s));
-    // Eén uitgelichte foto, daarna een luchtige galerij. Bewijsfoto's blijven apart.
-    const featured=mooi[0],rest=mooi.slice(1);
+    
     return `<div class="photo-page">${header("Mijn foto's",'Vogels door mijn eigen lens.')}
       ${mooi.length?`<section class="photo-album" aria-label="Mijn mooiste vogelfoto's">
-        ${featuredPhoto(featured)}
-        ${rest.length?`<div class="photo-gallery">${rest.map(stampCard).join('')}</div>`:''}
+        <div class="photo-gallery">${mooi.map(stampCard).join('')}</div>
       </section>`:'<div class="empty">Nog geen foto’s toegevoegd.</div>'}
       ${bewijs.length?`<section class="proof-photo-section"><div class="photo-section-title"><div><div class="photo-overline">VASTGELEGD IN HET VELD</div><h2>Bewijsfoto's <span class="proof-photo-count">${bewijs.length}</span></h2></div></div><p class="muted photo-section-intro">Waarnemingen met een foto als bewijs, los van je fotoalbum.</p><div class="proof-photo-grid">${bewijs.map(stampCard).join('')}</div></section>`:''}
       <section class="photo-missing-section"><div class="photo-section-title"><div><div class="photo-overline">NOG OP DE FOTO TE ZETTEN</div><h2>Gezien, maar nog geen foto</h2></div><span class="photo-section-number">${missing.length}</span></div>${missing.length?`<div class="photo-missing-list">${missing.map(s=>rowitem(s)).join('')}</div>`:'<p class="muted">Je hebt van alle geziene soorten al een foto.</p>'}</section>
@@ -297,12 +295,13 @@ function progressBar(n,total){
 }
 function stats(){
     const seen=species.filter(s=>entries[s.id]?.seen),total=species.length;
-    const rarities=rarityOrder.map(r=>({r,n:seen.filter(s=>s.rarity===r).length,total:species.filter(s=>s.rarity===r).length}));
+    const rarities=rarityOrder.map(r=>({r,n:seen.filter(s=>s.rarity===r).length,total:species.filter(s=>s.rarity===r).length,birds:species.filter(s=>s.rarity===r)}));
     const groups=[...new Set(species.map(s=>s.group))].map(g=>({g,n:seen.filter(s=>s.group===g).length,total:species.filter(s=>s.group===g).length,birds:species.filter(s=>s.group===g)})).sort((a,b)=>b.n-a.n);
     return `${header('Statistieken','Jouw vogeldagboek in cijfers.')}
 <div class="stats">${stat('Levenslijst',seen.length)}${stat('Voortgang catalogus',total?Math.round(100*seen.length/total)+'%':'0%')}${stat('Foto’s',countPhoto())}</div>
-<section class="panel stats-panel"><h2>Zeldzaamheid</h2>${rarities.map(x=>`<div class="chartline chart-animate"><label>${esc(x.r)}</label>${progressBar(x.n,x.total)}<span>${x.n}/${x.total}</span></div>`).join('')}</section>
-<section class="panel stats-panel"><div class="stats-group-heading"><h2>Vogelgroepen</h2><p class="muted">Klik op een vogelgroep om alle soorten te bekijken.</p></div>
+<section class="panel stats-panel"><h2>Zeldzaamheid</h2>
+${rarities.map(x=>`<details class="group-details"><summary class="group-summary"><span class="group-chevron" aria-hidden="true">⌄</span><span class="group-label">${esc(x.r)}</span>${progressBar(x.n,x.total)}<span class="group-count">${x.n}/${x.total}</span></summary><div class="group-species">${x.birds.map(s=>`<button type="button" class="group-species-row" data-edit="${esc(s.id)}"><span class="group-species-status ${entries[s.id]?.seen?'is-seen':''}" aria-label="${entries[s.id]?.seen?'Gezien':'Niet gezien'}">${entries[s.id]?.seen?'✓':'○'}</span><span class="group-species-names"><strong>${esc(s.name)}</strong><small>${esc(s.scientific)}</small></span><span class="group-species-arrow" aria-hidden="true">›</span></button>`).join('')}</div></details>`).join('')}</section>
+<section class="panel stats-panel"><div class="stats-group-heading"><h2>Vogelgroepen</h2></div>
 ${groups.map(x=>`<details class="group-details"><summary class="group-summary"><span class="group-chevron" aria-hidden="true">⌄</span><span class="group-label">${esc(x.g)}</span>${progressBar(x.n,x.total)}<span class="group-count">${x.n}/${x.total}</span></summary><div class="group-species">${x.birds.map(s=>`<button type="button" class="group-species-row" data-edit="${esc(s.id)}"><span class="group-species-status ${entries[s.id]?.seen?'is-seen':''}" aria-label="${entries[s.id]?.seen?'Gezien':'Niet gezien'}">${entries[s.id]?.seen?'✓':'○'}</span><span class="group-species-names"><strong>${esc(s.name)}</strong><small>${esc(s.scientific)}</small></span><span class="group-species-arrow" aria-hidden="true">›</span></button>`).join('')}</div></details>`).join('')}</section>`;
 }
 
