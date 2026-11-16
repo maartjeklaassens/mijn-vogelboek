@@ -1,5 +1,5 @@
 import {seed} from './species.js?v=22';
-import {collagePanelHtml, mountCollage} from './collage.js?v=2'; 
+import {collagePanelHtml, mountCollage} from './collage.js?v=2';
 import {loadStickerIndex, stickerMatch, stickerCandidates, stickerDiagnostics} from './stickers.js?v=12';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -186,10 +186,10 @@ function cardStickerOverlay(s, size=68){
 function countSeen(){return Object.keys(entries).filter(k=>entries[k]?.seen).length}
 function countPhoto(){return Object.values(entries).filter(x=>x.seen&&(x.photo||x.photoPath)).length}
 
-const iconHome = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>`;
-const iconBird = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12a8 8 0 0 0 8 8V7a4 4 0 0 0-7.28-2.3L2 20h3.41s1.37-3 4.37-3c3 0 4.37 3 4.37 3H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20h14.5l3.5-3.5zm-2 16v3h1.5v-3zm4-1v3.5h1.5V17zm-4.5-8.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>`;
-const iconCam = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8.5c-1.93 0-3.5-1.57-3.5-3.5S10.07 9.5 12 9.5s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5zm7-11.5h-2.5L15 3H9L7.5 5H5c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z"/></svg>`;
-const iconSearch = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l4.25 4.25a1 1 0 001.41-1.41l-4.25-4.25zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`;
+const iconHome = `<span class="nav-image-icon nav-home-icon" aria-hidden="true"></span>`;
+const iconBird = `<span class="nav-image-icon nav-bird-icon" aria-hidden="true"></span>`;
+const iconCam = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M8.35 3.75h7.3l1.45 2.1H20a2.75 2.75 0 0 1 2.75 2.75v9.1A2.75 2.75 0 0 1 20 20.45H4A2.75 2.75 0 0 1 1.25 17.7V8.6A2.75 2.75 0 0 1 4 5.85h2.9l1.45-2.1ZM12 8.1a5.15 5.15 0 1 0 0 10.3 5.15 5.15 0 0 0 0-10.3Zm0 2.15a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z" clip-rule="evenodd"/></svg>`;
+const iconSearch = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.4"/><path d="m15.3 15.3 5.1 5.1"/></svg>`;
 const iconChart = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="3" width="4" height="18" rx="1"/><rect x="17" y="14" width="4" height="7" rx="1"/></svg>`;
 const iconGear = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
@@ -211,7 +211,7 @@ function dashboard(){
     
     return `<div class="top"><div><div class="eyebrow">Mijn persoonlijke natuurdagboek</div><h1>Welkom in je vogelboek</h1><div class="muted">Overzicht van al je waarnemingen en foto's.</div></div></div>
 ${collagePanelHtml(species,entries)}
-<div class="stats">${stat('Soorten gezien',seen)}${stat("Met eigen foto",photos)}${stat('Nog zonder foto',seen-photos)}${stat('Dit jaar',Object.values(entries).filter(e=>e.seen&&e.date?.startsWith(new Date().getFullYear().toString())).length)}</div>
+<div class="stats">${stat('Soorten gezien',seen)}${stat("Met eigen foto",photos)}${stat('Nog zonder foto',seen-photos)}</div>
 <div class="layout"><section class="panel"><div class="panel-header"><h2>Jouw waarnemingen</h2><button class="link" data-page="vogels">Alle vogels →</button></div>${recent.length?recent.map(s=>rowitem(s)).join(''):'<div class="empty">Nog geen waarnemingen.</div>'}</section><section class="panel"><h2>Op zoek naar...</h2><p class="sectionlead">Je eigen ontdek-lijst: soorten die je nog wilt zien en gefotografeerde soorten die ontbreken.</p><button class="button" data-page="ontdekken">Bekijk je zoeklijst</button></section></div>`;
 }
 
@@ -274,7 +274,7 @@ function fotos(){
     const bewijs=allPhotos.filter(s=>entries[s.id]?.proofPhoto);
     const missing=species.filter(s=>entries[s.id]?.seen&&!hasPhoto(s));
     
-    return `<div class="photo-page">${header("Mijn foto's",'Vogels door mijn eigen lens.')}
+    return `<div class="photo-page">${header("Mijn foto's","Jouw zelfgemaakt foto's")}
       ${mooi.length?`<section class="photo-album" aria-label="Mijn mooiste vogelfoto's">
         <div class="photo-gallery">${mooi.map(stampCard).join('')}</div>
       </section>`:'<div class="empty">Nog geen foto’s toegevoegd.</div>'}
@@ -297,7 +297,7 @@ function stats(){
     const seen=species.filter(s=>entries[s.id]?.seen),total=species.length;
     const rarities=rarityOrder.map(r=>({r,n:seen.filter(s=>s.rarity===r).length,total:species.filter(s=>s.rarity===r).length,birds:species.filter(s=>s.rarity===r)}));
     const groups=[...new Set(species.map(s=>s.group))].map(g=>({g,n:seen.filter(s=>s.group===g).length,total:species.filter(s=>s.group===g).length,birds:species.filter(s=>s.group===g)})).sort((a,b)=>b.n-a.n);
-    return `${header('Statistieken','Jouw vogeldagboek in cijfers.')}
+    return `${header('Statistieken','Jouw vogels in cijfers')}
 <div class="stats">${stat('Levenslijst',seen.length)}${stat('Voortgang catalogus',total?Math.round(100*seen.length/total)+'%':'0%')}${stat('Foto’s',countPhoto())}</div>
 <section class="panel stats-panel"><h2>Zeldzaamheid</h2>
 ${rarities.map(x=>`<details class="group-details"><summary class="group-summary"><span class="group-chevron" aria-hidden="true">⌄</span><span class="group-label">${esc(x.r)}</span>${progressBar(x.n,x.total)}<span class="group-count">${x.n}/${x.total}</span></summary><div class="group-species">${x.birds.map(s=>`<button type="button" class="group-species-row" data-edit="${esc(s.id)}"><span class="group-species-status ${entries[s.id]?.seen?'is-seen':''}" aria-label="${entries[s.id]?.seen?'Gezien':'Niet gezien'}">${entries[s.id]?.seen?'✓':'○'}</span><span class="group-species-names"><strong>${esc(s.name)}</strong><small>${esc(s.scientific)}</small></span><span class="group-species-arrow" aria-hidden="true">›</span></button>`).join('')}</div></details>`).join('')}</section>

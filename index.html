@@ -1,11 +1,12 @@
-<!doctype html> 
+<!doctype html>
 <html lang="nl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#c25977">
 <title>Mijn Vogelboek</title>
-<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/png" sizes="256x256" href="./favicon-v36.png">
+<link rel="apple-touch-icon" href="./favicon-v36.png">
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght=600&display=swap" rel="stylesheet">
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#4a2b33;background:#ffffff}*{box-sizing:border-box}body{margin:0;position:relative}
@@ -245,7 +246,7 @@ html,body,.shell,.main{background:#fff !important}
 .group-summary:hover{background:#fdf6f8}
 .group-summary:focus-visible{outline:2px solid #c25977;outline-offset:-2px}
 
-.group-chevron{color:#c25977;font-size:23px;width:22px;flex:none;transition:transform .2s;display:inline-flex;align-items:center;justify-content:center;height:24px;margin-top:-6px}
+.group-chevron{color:#c25977;font-size:23px;width:22px;flex:none;transition:transform .2s;display:inline-flex;align-items:center;justify-content:center;height:24px;margin-top:-9px}
 
 .group-details[open] .group-chevron{transform:rotate(180deg)}
 .group-label{font:600 13px/1.4 Inter,system-ui,sans-serif;flex:0 0 180px}
@@ -266,6 +267,10 @@ html,body,.shell,.main{background:#fff !important}
 @media(max-width:450px){.photo-feature{height:300px}.photo-feature-label{right:64px}.photo-feature-label>span:last-child{font-size:11px}.photo-feature-sticker{width:43px;height:43px;right:12px;bottom:12px}.photo-gallery{columns:2 120px}.proof-photo-grid .stamp-card>img{height:125px}.proof-photo-grid .stamp-name,.photo-gallery .stamp-name{font-size:11px;padding-right:32px}.photo-gallery .stamp-badge,.proof-photo-grid .stamp-badge{width:35px;height:35px}.group-label{flex-basis:95px;font-size:11px}.group-count{width:42px}}
 @media(prefers-reduced-motion:reduce){.stats-panel .chart-fill{transition:none}}
 
+/* Navigatie: echte gevulde silhouetten in plaats van lijniconen. */
+.nav-image-icon{display:block;width:18px;height:18px;flex:none;background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:center;mask-position:center;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.nav-home-icon{-webkit-mask-image:url('./nav-home.png');mask-image:url('./nav-home.png')}
+.nav-bird-icon{-webkit-mask-image:url('./favicon-v36.png');mask-image:url('./favicon-v36.png')}
 </style>
 </head>
 <body>
@@ -278,7 +283,7 @@ html,body,.shell,.main{background:#fff !important}
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=35"></script>
+<script type="module" src="./app.js?v=36"></script>
 
 <!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
