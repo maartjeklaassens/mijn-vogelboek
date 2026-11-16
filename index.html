@@ -191,6 +191,79 @@ html,body,.shell,.main{background:#fff !important}
 .proof-photo-option span{display:grid;gap:5px}
 .proof-photo-option small{font-size:12px;font-weight:400;color:#816b74;line-height:1.4}
 
+
+/* Update: rustige fotogalerij, zonder wisselende lettertypes of postzegelmaskers */
+.photo-page{--photo-pink:#c25977;--photo-ink:#4a2b33}
+.photo-page .top{margin-bottom:24px}
+.photo-page .top h1,.photo-page h2{font-family:Georgia,serif;font-weight:400;letter-spacing:-.035em}
+.photo-album{display:grid;gap:19px}
+.photo-feature{position:relative;display:block;width:100%;height:clamp(280px,41vw,475px);border:0;border-radius:20px;padding:0;overflow:hidden;background:#f2e3e8;text-align:left;isolation:isolate;cursor:pointer}
+.photo-feature>img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.photo-feature:hover>img{transform:scale(1.035)}
+.photo-feature-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 37%,rgba(37,18,29,.66) 100%);pointer-events:none}
+.photo-feature-label{position:absolute;left:clamp(22px,4vw,46px);right:90px;bottom:clamp(23px,4vw,43px);display:flex;flex-direction:column;align-items:flex-start;gap:8px;color:white}
+.photo-feature-kicker,.photo-overline{font:700 10px/1.4 Inter,system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase}
+.photo-feature-label strong{font:400 clamp(30px,4vw,51px)/1.1 Georgia,serif;letter-spacing:-.035em}
+.photo-feature-label>span:last-child{font:500 12px/1.5 Inter,system-ui,sans-serif;color:#fff9}
+.photo-feature-sticker{right:22px;bottom:20px;width:55px;height:55px;background:#fff;border-radius:14px;padding:5px;box-shadow:0 5px 17px #0003}
+.photo-gallery{columns:3 230px;column-gap:18px;line-height:0}
+.photo-gallery .stamp-wrapper{display:inline-block;width:100%;break-inside:avoid;line-height:normal;margin:0 0 18px;filter:none;transform:none}
+.photo-gallery .stamp-wrapper:hover{transform:translateY(-4px)}
+.photo-gallery .stamp-card,.proof-photo-grid .stamp-card{mask:none!important;-webkit-mask:none!important;background:white;border:1px solid #f0e1e6;border-radius:14px;padding:9px 9px 0;overflow:hidden;box-shadow:0 3px 14px rgba(78,36,53,.045);transition:box-shadow .2s}
+.photo-gallery .stamp-card:hover,.proof-photo-grid .stamp-card:hover{box-shadow:0 12px 28px rgba(78,36,53,.12)}
+.photo-gallery .stamp-card>img,.proof-photo-grid .stamp-card>img{width:100%;height:auto;min-height:135px;max-height:400px;object-fit:cover;border-radius:8px;display:block}
+.photo-gallery .stamp-name,.proof-photo-grid .stamp-name{position:static;display:flex;min-height:47px;height:auto;padding:10px 48px 10px 6px;justify-content:flex-start;align-items:center;text-align:left;font:600 13px/1.35 Inter,system-ui,sans-serif;letter-spacing:0;color:#4a2b33}
+.photo-gallery .stamp-badge,.proof-photo-grid .stamp-badge{width:45px;height:45px;right:6px;bottom:5px;border-radius:11px;box-shadow:0 2px 7px #0001}
+.photo-section-title{display:flex;align-items:end;justify-content:space-between;gap:16px}
+.photo-overline{color:#a45a75;margin-bottom:8px}
+.photo-section-title h2{font-size:clamp(25px,3vw,33px);margin:0}
+.photo-section-intro{font:400 13px/1.55 Inter,system-ui,sans-serif;margin:9px 0 0}
+.photo-section-number{font:600 13px Inter,system-ui,sans-serif;color:#8c6472}
+.proof-photo-section{margin:32px 0 0;padding:30px 0 0;border-top:1px solid #ecdde2}
+.proof-photo-section h2{display:flex;align-items:center;gap:12px}
+.proof-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:18px;margin-top:18px;align-items:start}
+.proof-photo-grid .stamp-wrapper{display:block;width:100%;max-width:none;margin:0;filter:none}
+.proof-photo-grid .stamp-wrapper:hover{transform:translateY(-3px)}
+.proof-photo-grid .stamp-card>img{height:190px;min-height:0;max-height:none}
+.photo-missing-section{margin:37px 0 0;padding:30px 0 0;border-top:1px solid #ecdde2}
+.photo-missing-list{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));column-gap:30px}
+.photo-missing-list .rowitem{min-width:0}
+/* Nog te ontdekken: gewone kleur en scherpte */
+.wazig,.wazig:hover{filter:none!important;transform:none!important;cursor:default}
+/* Vlottere statistieken: lege track blijft staan; donkere voortgang vult bij scrollen */
+.stats-panel{overflow:hidden}
+.stats-panel .chartline .track,.group-summary .track{background:#f5e1e8}
+.stats-panel .chart-fill{width:0!important;transition:width .78s cubic-bezier(.18,.8,.25,1);will-change:width}
+.stats-panel .chart-fill.is-visible{width:var(--target-width)!important}
+.stats-group-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.stats-group-heading h2{margin:0}
+.stats-group-heading p{font-size:12px;margin:0 0 5px}
+.group-details{border-top:1px solid #f1e1e7}
+.group-details:last-child{border-bottom:1px solid #f1e1e7}
+.group-summary{list-style:none;display:flex;align-items:center;gap:13px;padding:16px 5px;cursor:pointer;border-radius:8px;min-height:55px}
+.group-summary::-webkit-details-marker{display:none}
+.group-summary:hover{background:#fdf6f8}
+.group-summary:focus-visible{outline:2px solid #c25977;outline-offset:-2px}
+.group-chevron{color:#c25977;font-size:23px;line-height:16px;width:22px;flex:none;transition:transform .2s}
+.group-details[open] .group-chevron{transform:rotate(180deg)}
+.group-label{font:600 13px/1.4 Inter,system-ui,sans-serif;flex:0 0 180px}
+.group-summary .track{height:12px;flex:1;min-width:24px}
+.group-count{width:53px;flex:none;text-align:right;font-size:12px;color:#8f747d;font-variant-numeric:tabular-nums}
+.group-species{padding:3px 12px 16px 38px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));column-gap:20px}
+.group-species-row{display:flex;gap:10px;align-items:center;width:100%;text-align:left;padding:11px 5px;border:0;border-bottom:1px solid #f6e9ed;background:transparent;color:#4a2b33}
+.group-species-row:hover{background:#fdf6f8}
+.group-species-status{font-size:20px;flex:none;color:#bea7af}
+.group-species-status.is-seen{color:#c25977}
+.group-species-names{flex:1;min-width:0;display:grid;gap:3px}
+.group-species-names strong{font-size:12px;line-height:1.4;font-weight:600}
+.group-species-names small{font-size:11px;font-style:italic;color:#9c858d}
+.group-species-arrow{color:#b88798;font-size:20px}
+/* Tooltip heeft dezelfde roze huisstijl als de navigatie */
+.vb-collage-hint{background:#c25977;color:#fff;box-shadow:0 4px 12px #6d2e4540}
+@media(max-width:700px){.photo-gallery{columns:2 150px;column-gap:12px}.proof-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.proof-photo-grid .stamp-card>img{height:150px}.group-label{flex-basis:110px}.group-summary{gap:8px}.group-species{grid-template-columns:1fr;padding-left:20px}}
+@media(max-width:450px){.photo-feature{height:300px}.photo-feature-label{right:64px}.photo-feature-label>span:last-child{font-size:11px}.photo-feature-sticker{width:43px;height:43px;right:12px;bottom:12px}.photo-gallery{columns:2 120px}.proof-photo-grid .stamp-card>img{height:125px}.proof-photo-grid .stamp-name,.photo-gallery .stamp-name{font-size:11px;padding-right:32px}.photo-gallery .stamp-badge,.proof-photo-grid .stamp-badge{width:35px;height:35px}.group-label{flex-basis:95px;font-size:11px}.group-count{width:42px}}
+@media(prefers-reduced-motion:reduce){.stats-panel .chart-fill{transition:none}}
+
 </style>
 </head>
 <body>
@@ -203,7 +276,7 @@ html,body,.shell,.main{background:#fff !important}
 
 <!-- DE APP -->
 <div id="app"></div>
-<script type="module" src="./app.js?v=34"></script>
+<script type="module" src="./app.js?v=35"></script>
 
 <!-- STARTPAGINA CURSOR LOGICA (met 32 vogels) -->
 <script>
