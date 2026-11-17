@@ -1,6 +1,6 @@
 // Mijn Vogelboek: één resolver voor soortstickers, AviList en ondersoorten.
 // Bron: https://github.com/alchaincyf/huashu-bird-sticker (CC BY 4.0).
-// Er worden geen willekeurige vervangende soorten gebruikt.
+// Alleen 14 gedocumenteerde AviList-hoofdsoort-terugvallen uit v3; overige soorten exact.
 const CDN = 'https://cdn.jsdelivr.net/gh/alchaincyf/huashu-bird-sticker@main/';
 const RAW = 'https://raw.githubusercontent.com/alchaincyf/huashu-bird-sticker/main/';
 const STICKERS = 'data/stickers.json';
@@ -187,6 +187,32 @@ function formCandidate(parent,form){
   if(!parentPath)return '';
   return parentPath.replace(/\.(webp|png)$/i,'.'+form.toLowerCase()+'.$1');
 }
+// Alleen de veertien vermeldingen die in de Nederlandse lijst als aparte
+// (onder)soort/vorm voorkomen, terwijl AviList ze bij een andere soort indeelt.
+// Versie 3 toonde voor deze vogels al een sticker van die grotere soort.
+// Eerst blijven de EXÁCTE kandidaten (inclusief eventuele vormbestanden)
+// voorgaan; pas als die niet laden, mag de genoemde oudersoort verschijnen.
+// Deze terugval is BEWUST NIET soortspecifiek voor de gevraagde vorm.
+// Alle andere 539 vermeldingen blijven exact dezelfde koppellogica houden.
+const olderStickerFallbacks = {
+  'witbuikrotgans': ['Branta bernicla'],
+  'zwarte rotgans': ['Branta bernicla'],
+  'thayers meeuw': ['Larus glaucoides'],
+  // pallidirostris staat in sommige lijsten onder de Steppeklapekster;
+  // de algemene klapekster is uitsluitend de laatste uitwijkmogelijkheid.
+  'steppeklapekster': ['Lanius pallidirostris', 'Lanius excubitor'],
+  'strandleeuwerik': ['Eremophila alpestris'],
+  'siberische tjiftjaf': ['Phylloscopus collybita'],
+  'humes braamsluiper': ['Curruca curruca'],
+  'engelse kwikstaart': ['Motacilla flava'],
+  'noordse kwikstaart': ['Motacilla flava'],
+  'witkeelkwikstaart': ['Motacilla flava'],
+  'balkankwikstaart': ['Motacilla flava'],
+  'rouwkwikstaart': ['Motacilla alba'],
+  'witstuitbarmsijs': ['Acanthis flammea'],
+  'kleinste canadese gans': ['Branta hutchinsii']
+};
+
 export function stickerCandidates(scientific, dutchName='') {
   const result=[];
   const names=namesFor(scientific,dutchName);
@@ -204,9 +230,13 @@ export function stickerCandidates(scientific, dutchName='') {
     const p=matches.get(name);
     addCandidate(result,p,'exacte soort '+name);
   }
-  // Kleine zwaan is in AviList Cygnus columbianus; dit was al het
-  // geaccepteerde werkende gedrag in v9. Voor andere ondersoorten wordt de
-  // algemene moeder-/bovenliggende soort juist NIET als vervanger gebruikt.
+  // V3-compatibiliteit voor precies 14 vermeldingen: alleen als laatste
+  // kandidaat, zodat een echte afbeelding van de vorm altijd voorrang heeft.
+  // Het bestandspad komt UIT de werkende stickerindex en wordt nooit geraden.
+  for(const parent of olderStickerFallbacks[norm(dutchName)] || []) {
+    addCandidate(result,matches.get(norm(parent)),'vorm met sticker van hoofdsoort '+parent);
+  }
+  // Overige soorten behouden hun bestaande, uitsluitend exacte kandidaten.
   return result.flatMap(x=>[
     {...x,url:CDN+x.path},
     {...x,url:RAW+x.path}
